@@ -21,17 +21,22 @@
 const SESSION_EXPIRE_MINUTES = 10;
 const FALLBACK_PASSWORD = '741520'; // 仅本地 / 测试时回退
 
+// 当未绑定 D1 时，退回到进程内存存储会话（实例重启会丢失）
+const memorySessions = new Map();
+let schemaReady = false;
+
 function unixNowSec(){ return Math.floor(Date.now()/1000); }
 
 function makeCorsHeaders(request){
   const origin = request.headers.get('Origin') || '*';
-  const allowCredentials = origin === '*' ? 'false' : 'true';
-  return {
+  const headers = {
     'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Session-Id',
-    'Access-Control-Allow-Credentials': allowCredentials
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Session-Id'
   };
+
+  if(origin !== '*') headers['Access-Control-Allow-Credentials'] = 'true';
+  return headers;
 }
 function jsonResponse(data, request, status=200){
   const headers = { ...makeCorsHeaders(request), 'Content-Type': 'application/json;charset=UTF-8' };
@@ -41,13 +46,66 @@ function noContentResponse(request){ return new Response(null,{ status:204, head
 
 function generateSessionId(){ return crypto.randomUUID(); }
 
+function isDbAvailable(env){
+  return !!(env && env.DB && typeof env.DB.prepare === 'function');
+}
+
+async function ensureSchema(env){
+  if(schemaReady || !isDbAvailable(env)) return;
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id TEXT PRIMARY KEY,
+      expires_at INTEGER
+    );
+  `).run();
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS articles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT,
+      excerpt TEXT,
+      raw_content TEXT,
+      content TEXT,
+      category TEXT,
+      tag TEXT,
+      tag_color TEXT,
+      date TEXT,
+      status TEXT,
+      pinned INTEGER,
+      created_at TEXT,
+      updated_at TEXT
+    );
+  `).run();
+  schemaReady = true;
+}
+
+function arrayBufferToBase64(buffer){
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
+  for(let i=0;i<bytes.length;i+=chunkSize){
+    binary += String.fromCharCode(...bytes.subarray(i, i+chunkSize));
+  }
+  return btoa(binary);
+}
+
 async function validateSession(request, env){
   const sid = request.headers.get('X-Session-Id');
   if(!sid) return false;
   try{
     const now = unixNowSec();
-    const row = await env.DB.prepare('SELECT id FROM sessions WHERE id = ? AND expires_at > ?').bind(sid, now).first();
-    return !!row;
+    if(isDbAvailable(env)){
+      await ensureSchema(env);
+      const row = await env.DB.prepare('SELECT id FROM sessions WHERE id = ? AND expires_at > ?').bind(sid, now).first();
+      return !!row;
+    }
+
+    const exp = memorySessions.get(sid);
+    if(!exp) return false;
+    if(exp <= now){
+      memorySessions.delete(sid);
+      return false;
+    }
+    return true;
   }catch(e){
     console.error('validateSession db err', e);
     return false;
@@ -66,7 +124,7 @@ async function uploadToGitHub(env, filename, arrayBuffer, contentType){
   const key = `assets/${Date.now()}-${filename}`;
   const apiUrl = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(key)}`;
   // Create Base64 content
-  const b64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+  const b64 = arrayBufferToBase64(arrayBuffer);
   const body = {
     message: `upload ${key}`,
     content: b64
@@ -107,7 +165,12 @@ export default {
         if(!pw || pw !== ACCESS_PASSWORD) return jsonResponse({ error:'密码错误' }, request, 401);
         const sid = generateSessionId();
         const expiresAt = unixNowSec() + SESSION_EXPIRE_MINUTES*60;
-        await env.DB.prepare('INSERT INTO sessions (id, expires_at) VALUES (?, ?)').bind(sid, expiresAt).run();
+        if(isDbAvailable(env)){
+          await ensureSchema(env);
+          await env.DB.prepare('INSERT INTO sessions (id, expires_at) VALUES (?, ?)').bind(sid, expiresAt).run();
+        }else{
+          memorySessions.set(sid, expiresAt);
+        }
         return jsonResponse({ success:true, sessionId: sid, expiresAt }, request, 200);
       }
 
@@ -120,7 +183,13 @@ export default {
       // LOGOUT
       if(path === '/api/auth/logout' && method === 'POST'){
         const sid = request.headers.get('X-Session-Id');
-        if(sid) await env.DB.prepare('DELETE FROM sessions WHERE id = ?').bind(sid).run();
+        if(sid){
+          if(isDbAvailable(env)){
+            await ensureSchema(env);
+            await env.DB.prepare('DELETE FROM sessions WHERE id = ?').bind(sid).run();
+          }
+          memorySessions.delete(sid);
+        }
         return jsonResponse({ success:true }, request, 200);
       }
 
@@ -130,6 +199,8 @@ export default {
 
       // GET ARTICLES
       if(path === '/api/articles' && method === 'GET'){
+        if(!isDbAvailable(env)) return jsonResponse({ error:'未配置数据库，请在 Worker 绑定 D1 并导入表结构。' }, request, 501);
+        await ensureSchema(env);
         const rows = await env.DB.prepare(`
           SELECT id, title, excerpt, raw_content, content, category, tag, tag_color, date, status, pinned, created_at, updated_at
           FROM articles ORDER BY pinned DESC, created_at DESC
@@ -140,6 +211,7 @@ export default {
 
       // CREATE ARTICLE
       if(path === '/api/articles' && method === 'POST'){
+        if(!isDbAvailable(env)) return jsonResponse({ error:'未配置数据库，请在 Worker 绑定 D1 并导入表结构。' }, request, 501);
         let a;
         try{ a = await request.json(); } catch(e){ return jsonResponse({ error:'Invalid JSON' }, request, 400); }
         const raw_content = a.raw_content !== undefined ? a.raw_content : (a.rawContent || '');
@@ -147,6 +219,7 @@ export default {
         const pinned = a.pinned ? 1 : 0;
         const nowIso = new Date().toISOString();
         const dateStr = new Date().toLocaleDateString('zh-CN', { year:'numeric', month:'long' });
+        await ensureSchema(env);
         const res = await env.DB.prepare(`
           INSERT INTO articles (title, excerpt, raw_content, content, category, tag, tag_color, date, status, pinned, created_at, updated_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -169,6 +242,7 @@ export default {
 
       // UPDATE ARTICLE
       if(path.match(/^\/api\/articles\/\d+$/) && method === 'PUT'){
+        if(!isDbAvailable(env)) return jsonResponse({ error:'未配置数据库，请在 Worker 绑定 D1 并导入表结构。' }, request, 501);
         const id = path.split('/').pop();
         let a;
         try{ a = await request.json(); } catch(e){ return jsonResponse({ error:'Invalid JSON' }, request, 400); }
@@ -176,6 +250,7 @@ export default {
         const tag_color = a.tag_color !== undefined ? a.tag_color : (a.tagColor || 'purple');
         const pinned = a.pinned ? 1 : 0;
         const nowIso = new Date().toISOString();
+        await ensureSchema(env);
         await env.DB.prepare(`
           UPDATE articles SET title=?, excerpt=?, raw_content=?, content=?, category=?, tag=?, tag_color=?, status=?, pinned=?, updated_at=? WHERE id=?
         `).bind(
@@ -196,7 +271,9 @@ export default {
 
       // DELETE ARTICLE
       if(path.match(/^\/api\/articles\/\d+$/) && method === 'DELETE'){
+        if(!isDbAvailable(env)) return jsonResponse({ error:'未配置数据库，请在 Worker 绑定 D1 并导入表结构。' }, request, 501);
         const id = path.split('/').pop();
+        await ensureSchema(env);
         await env.DB.prepare('DELETE FROM articles WHERE id = ?').bind(id).run();
         return jsonResponse({ success:true }, request, 200);
       }
