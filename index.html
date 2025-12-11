@@ -205,7 +205,14 @@
 
 <script>
 /* ------------------ CONFIG ------------------- */
-const API_BASE = "";
+const API_BASE = (()=>{
+  const param = new URLSearchParams(location.search).get("api_base");
+  if(param){
+    localStorage.setItem("apiBaseOverride", param);
+    return param;
+  }
+  return localStorage.getItem("apiBaseOverride") || "";
+})();
 const SESSION_LIFETIME_MS = 10 * 60 * 1000;
 const MAX_INLINE_FILE_BYTES = 800 * 1024;
 
@@ -225,27 +232,62 @@ function escapeHtml(s){
   return String(s||"")
     .replace(/&/g,"&amp;")
     .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;");
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
 }
 
-/* markdown renderer */
-function mdToHtml(md){
-  if(!md) return "";
-  md = md.replace(/```([\s\S]*?)```/g,(m,c)=>`<pre><code>${escapeHtml(c)}</code></pre>`);
-  md = md.replace(/`([^`]+)`/g,(m,c)=>`<code>${escapeHtml(c)}</code>`);
-  md = md.replace(/^### (.*$)/gim,"<h3>$1</h3>");
-  md = md.replace(/^## (.*$)/gim,"<h2>$1</h2>");
-  md = md.replace(/^# (.*$)/gim,"<h1>$1</h1>");
-  md = md.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(m,a,u)=>`<img alt="${escapeHtml(a)}" src="${escapeHtml(u)}" style="max-width:100%">`);
-  md = md.replace(/\[([^\]]+)\]\(([^)]+)\)/g,(m,a,u)=>`<a class="link" href="${escapeHtml(u)}" target="_blank">${a}</a>`);
-  md = md.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
-  md = md.replace(/\*(.+?)\*/g,"<em>$1</em>");
-  md = md.replace(/^\s*-\s+(.*)/gm,"<li>$1</li>");
-  md = md.replace(/(<li>[\s\S]*?<\/li>)/g,"<ul>$1</ul>");
-  md = md.replace(/\n{2,}/g,"</p><p>");
-  md = md.replace(/\n/g,"<br>");
-  return "<p>"+md+"</p>";
-}
+  /* markdown renderer */
+  function mdToHtml(md){
+    if(!md) return "";
+    let safe = escapeHtml(md);
+
+    const placeholders = [];
+    const putPlaceholder = (html)=>{
+      const key = `__MD_PLACEHOLDER_${placeholders.length}__`;
+      placeholders.push({ key, html });
+      return key;
+    };
+
+    // 先替换代码块和行内代码，避免后续 markdown 规则污染代码内容
+    safe = safe.replace(/```([\s\S]*?)```/g,(m,c)=>putPlaceholder(`<pre><code>${c}</code></pre>`));
+    safe = safe.replace(/`([^`]+)`/g,(m,c)=>putPlaceholder(`<code>${c}</code>`));
+
+    safe = safe.replace(/^### (.*$)/gim,(m,c)=>`<h3>${c}</h3>`);
+    safe = safe.replace(/^## (.*$)/gim,(m,c)=>`<h2>${c}</h2>`);
+    safe = safe.replace(/^# (.*$)/gim,(m,c)=>`<h1>${c}</h1>`);
+    safe = safe.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(m,a,u)=>`<img alt="${a}" src="${u}" style="max-width:100%">`);
+    safe = safe.replace(/\[([^\]]+)\]\(([^)]+)\)/g,(m,a,u)=>`<a class="link" href="${u}" target="_blank" rel="noopener noreferrer">${a}</a>`);
+    safe = safe.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+    safe = safe.replace(/\*(.+?)\*/g,"<em>$1</em>");
+
+    // 列表：将连续的 "- " 开头行归并到同一个 <ul>
+    safe = safe.replace(/(^|\n)(?:\s*-\s+.*(?:\n|$))+/g, block => {
+      const lines = block.trim().split(/\n+/).map(l => l.replace(/^\s*-\s+/, ''));
+      const list = lines.filter(Boolean).map(li => `<li>${li}</li>`).join('');
+      const prefix = block.startsWith('\n') ? '\n' : '';
+      return list ? `${prefix}<ul>${list}</ul>` : '';
+    });
+
+    // 恢复代码块 / 行内代码占位符
+    placeholders.forEach(({ key, html }) => {
+      safe = safe.replace(key, html);
+    });
+
+    // 段落换行：双空行分段，单空行转 <br>
+    safe = safe
+      .split(/\n{2,}/)
+      .map(part => {
+        const chunk = part.trim();
+        if(!chunk) return '';
+        const blockLike = /^(<h[1-3]>|<ul>|<pre>)/i.test(chunk);
+        const withBr = chunk.replace(/\n/g,"<br>");
+        return blockLike ? withBr : `<p>${withBr}</p>`;
+      })
+      .join('');
+
+    return safe;
+  }
 
 /* ------------------ AUTH ------------------- */
 function setSession(sid){
@@ -307,7 +349,16 @@ document.getElementById("loginBtn").onclick = async ()=>{
       headers:{ "Content-Type":"application/json" },
       body:JSON.stringify({ password:pwd })
     });
-    const j = await res.json();
+
+    let j;
+    try{
+      j = await res.json();
+    }catch{
+      const txt = await res.text().catch(()=>"");
+      showToast("authToast", txt || "登录接口返回异常");
+      return;
+    }
+
     if(res.ok){
       setSession(j.sessionId);
       showMain();
@@ -315,8 +366,8 @@ document.getElementById("loginBtn").onclick = async ()=>{
     } else {
       showToast("authToast", j.error || "登录失败");
     }
-  }catch{
-    showToast("authToast","网络错误");
+  }catch(e){
+    showToast("authToast", e?.message || "网络错误");
   }
 };
 
