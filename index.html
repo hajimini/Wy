@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>我的笔记 / 博客</title>
+<style>
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", Helvetica, Arial;
+    background: #0b1220;
+    color: #e6eef8;
+  }
+  .hidden { display: none !important; }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: #071023;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+    position: sticky;
+    top: 0;
+    z-index: 99;
+  }
+
+  #mainContent { padding: 20px; max-width: 980px; margin: 0 auto; }
+
+  .card {
+    background: #071022;
+    padding: 18px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.35);
+  }
+
+  /* 新的登录 UI */
+  #authPage {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg,#0b1220,#071022,#0d1a33);
+    backdrop-filter: blur(6px);
+    z-index: 9999;
+  }
+
+  .auth-box {
+    background: rgba(11,18,32,0.85);
+    padding: 32px;
+    width: 360px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    animation: fadeIn .5s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 编辑器 */
+  #editorModal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,.6);
+    z-index: 2000;
+  }
+
+  .editor-box {
+    background: #071022;
+    padding: 20px;
+    width: 90%;
+    max-width: 880px;
+    border-radius: 14px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+  }
+
+  textarea {
+    width: 100%;
+    height: 260px;
+    margin-top: 12px;
+    padding: 12px;
+    background: #061427;
+    color: #e6eef8;
+    border: 1px solid #123;
+    border-radius: 8px;
+    font-size: 15px;
+    resize: vertical;
+  }
+
+  input[type=text], input[type=password] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #1f2a45;
+    background: #071022;
+    color: #e6eef8;
+    font-size: 15px;
+  }
+
+  .btn {
+    padding: 8px 12px;
+    background: #0b2740;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    color: white;
+    transition: 0.25s;
+  }
+  .btn:hover { background: #0e3555; }
+
+  #tocSidebar {
+    position: fixed;
+    right: 0;
+    top: 64px;
+    width: 260px;
+    background: #071422;
+    padding: 10px;
+    border-left: 1px solid #123;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  #tocSidebar.toc-collapsed { width: 48px; }
+
+  .small { font-size: 12px; color:#9fb6c9; }
+  .link { color:#7fd1ff; }
+
+</style>
+</head>
+<body>
+
+<!-- 登录页面（新版 UI） -->
+<div id="authPage">
+  <div class="auth-box">
+    <h2 style="margin:0 0 20px;text-align:center;color:#e6eef8;font-weight:600">
+      访问受限
+    </h2>
+
+    <p style="margin:0 0 16px;text-align:center;color:#9fb6c9;">
+      请输入访问密码继续浏览内容
+    </p>
+
+    <input id="passwordInput" placeholder="输入访问密码" type="password">
+
+    <button id="loginBtn" class="btn" style="width: 100%;margin-top:16px;">
+      登录
+    </button>
+
+    <div id="authToast" class="small" style="text-align:center;height:20px;margin-top:8px"></div>
+  </div>
+</div>
+
+<!-- 主区域 -->
+<div id="mainContent" class="hidden">
+  <header>
+    <div>记录代码之外的思考...</div>
+    <div>
+      <button id="newArticleBtn" class="btn">新建</button>
+      <button id="logoutBtn" class="btn">退出</button>
+    </div>
+  </header>
+
+  <main id="articleList"></main>
+</div>
+
+<!-- 编辑器 -->
+<div id="editorModal" class="hidden">
+  <div class="editor-box">
+    <input id="articleTitle" placeholder="文章标题 (必填)">
+
+    <div class="toolbar" style="margin-top:12px;display:flex;gap:8px;">
+      <button id="imageBtn" class="btn">上传图片</button>
+      <button id="fileBtn" class="btn">上传文件</button>
+      <button id="saveDraftBtn" class="btn">保存草稿</button>
+      <button id="publishBtn" class="btn">发布</button>
+      <button id="closeEditorBtn" class="btn">取消</button>
+    </div>
+
+    <textarea id="articleContent" placeholder="Markdown 内容"></textarea>
+
+    <input id="articleExcerpt" placeholder="文章摘要 (选填)" style="margin-top:12px;">
+
+    <div style="margin-top:8px">
+      <label><input type="checkbox" id="pinArticle"> 置顶</label>
+    </div>
+
+    <div id="editorToast" class="small" style="margin-top:8px;color:#f4b3b3"></div>
+  </div>
+</div>
+
+<!-- 隐藏文件控件 -->
+<input id="imageInput" type="file" accept="image/*" hidden>
+<input id="fileInput" type="file" accept=".pdf,.doc,.docx,.zip,.txt" hidden>
+
+<!-- TOC -->
+<div id="tocSidebar" class="hidden">
+  <button id="tocCollapseBtn" class="btn small">≡</button>
+  <div id="tocList" style="margin-top:10px"></div>
+</div>
+
+<script>
+/* ------------------ CONFIG ------------------- */
+const API_BASE = "";
+const SESSION_LIFETIME_MS = 10 * 60 * 1000;
+const MAX_INLINE_FILE_BYTES = 800 * 1024;
+
+let sessionId = null;
+let articles = [];
+let editingArticleId = null;
+
+/* ------------------ UTIL ------------------- */
+function showToast(id, msg, timeout=3000){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent = msg;
+  setTimeout(()=>{ if(el.textContent === msg) el.textContent = ""; }, timeout);
+}
+
+function escapeHtml(s){
+  return String(s||"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;");
+}
+
+/* markdown renderer */
+function mdToHtml(md){
+  if(!md) return "";
+  md = md.replace(/```([\s\S]*?)```/g,(m,c)=>`<pre><code>${escapeHtml(c)}</code></pre>`);
+  md = md.replace(/`([^`]+)`/g,(m,c)=>`<code>${escapeHtml(c)}</code>`);
+  md = md.replace(/^### (.*$)/gim,"<h3>$1</h3>");
+  md = md.replace(/^## (.*$)/gim,"<h2>$1</h2>");
+  md = md.replace(/^# (.*$)/gim,"<h1>$1</h1>");
+  md = md.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(m,a,u)=>`<img alt="${escapeHtml(a)}" src="${escapeHtml(u)}" style="max-width:100%">`);
+  md = md.replace(/\[([^\]]+)\]\(([^)]+)\)/g,(m,a,u)=>`<a class="link" href="${escapeHtml(u)}" target="_blank">${a}</a>`);
+  md = md.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+  md = md.replace(/\*(.+?)\*/g,"<em>$1</em>");
+  md = md.replace(/^\s*-\s+(.*)/gm,"<li>$1</li>");
+  md = md.replace(/(<li>[\s\S]*?<\/li>)/g,"<ul>$1</ul>");
+  md = md.replace(/\n{2,}/g,"</p><p>");
+  md = md.replace(/\n/g,"<br>");
+  return "<p>"+md+"</p>";
+}
+
+/* ------------------ AUTH ------------------- */
+function setSession(sid){
+  sessionId = sid;
+  localStorage.setItem("sessionId", sid);
+  localStorage.setItem("sessionExpiry", Date.now() + SESSION_LIFETIME_MS);
+}
+
+function clearSession(){
+  sessionId = null;
+  localStorage.removeItem("sessionId");
+  localStorage.removeItem("sessionExpiry");
+}
+
+async function checkAuth(){
+  const sid = localStorage.getItem("sessionId");
+  const exp = Number(localStorage.getItem("sessionExpiry") || 0);
+
+  if(!sid || Date.now() > exp){
+    showAuth();
+    return;
+  }
+
+  try{
+    const res = await fetch(`${API_BASE}/api/auth/check`,{
+      headers:{ "X-Session-Id":sid }
+    });
+    const j = await res.json();
+
+    if(res.ok && j.authenticated){
+      sessionId = sid;
+      localStorage.setItem("sessionExpiry", Date.now()+SESSION_LIFETIME_MS);
+      showMain();
+      loadArticles();
+      return;
+    }
+  }catch{}
+
+  clearSession();
+  showAuth();
+}
+
+function showAuth(){
+  document.getElementById("authPage").classList.remove("hidden");
+  document.getElementById("mainContent").classList.add("hidden");
+}
+
+function showMain(){
+  document.getElementById("authPage").classList.add("hidden");
+  document.getElementById("mainContent").classList.remove("hidden");
+}
+
+/* 登录 */
+document.getElementById("loginBtn").onclick = async ()=>{
+  const pwd = document.getElementById("passwordInput").value;
+  try{
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ password:pwd })
+    });
+    const j = await res.json();
+    if(res.ok){
+      setSession(j.sessionId);
+      showMain();
+      loadArticles();
+    } else {
+      showToast("authToast", j.error || "登录失败");
+    }
+  }catch{
+    showToast("authToast","网络错误");
+  }
+};
+
+/* 退出 */
+document.getElementById("logoutBtn").onclick = async ()=>{
+  try{ await fetch(`${API_BASE}/api/auth/logout`,{ method:"POST", headers:{ "X-Session-Id":sessionId } }); }catch{}
+  clearSession();
+  showAuth();
+};
+
+/* ------------------ ARTICLES ------------------- */
+async function loadArticles(){
+  try{
+    const res = await fetch(`${API_BASE}/api/articles`, {
+      headers:{ "X-Session-Id":sessionId }
+    });
+    const data = await res.json();
+    articles = Array.isArray(data)? data : [];
+    renderArticles();
+  }catch(e){ console.log(e); }
+}
+
+function renderArticles(){
+  const list = document.getElementById("articleList");
+  list.innerHTML = "";
+
+  articles.forEach(a=>{
+    const html = mdToHtml(a.raw_content || "");
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <h2>${escapeHtml(a.title)}</h2>
+      <div class="small">${a.date || ""}</div>
+      <div>${html}</div>
+      <div style="margin-top:12px">
+        <button class="btn" onclick="openEditor(${a.id})">编辑</button>
+        <button class="btn" onclick="deleteArticle(${a.id})">删除</button>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+/* 新建 */
+document.getElementById("newArticleBtn").onclick = ()=>{
+  editingArticleId = null;
+  document.getElementById("articleTitle").value="";
+  document.getElementById("articleContent").value="";
+  document.getElementById("articleExcerpt").value="";
+  document.getElementById("pinArticle").checked=false;
+  document.getElementById("editorModal").classList.remove("hidden");
+};
+
+/* 编辑 */
+function openEditor(id){
+  const a = articles.find(x=>x.id==id);
+  if(!a) return;
+
+  editingArticleId = id;
+  document.getElementById("articleTitle").value = a.title;
+  document.getElementById("articleContent").value = a.raw_content || "";
+  document.getElementById("articleExcerpt").value = a.excerpt || "";
+  document.getElementById("pinArticle").checked = !!a.pinned;
+
+  document.getElementById("editorModal").classList.remove("hidden");
+}
+
+document.getElementById("closeEditorBtn").onclick=
+  ()=>document.getElementById("editorModal").classList.add("hidden");
+
+/* 删除 */
+async function deleteArticle(id){
+  if(!confirm("确认删除？")) return;
+  try{
+    await fetch(`${API_BASE}/api/articles/${id}`,{
+      method:"DELETE",
+      headers:{ "X-Session-Id":sessionId }
+    });
+    articles = articles.filter(a=>a.id!=id);
+    renderArticles();
+  }catch{}
+}
+
+/* 保存文章 */
+async function save(status){
+  const title = document.getElementById("articleTitle").value.trim();
+  const raw = document.getElementById("articleContent").value;
+  const excerpt = document.getElementById("articleExcerpt").value;
+  const pinned = document.getElementById("pinArticle").checked?1:0;
+
+  if(!title && !raw){
+    showToast("editorToast","请填写内容");
+    return;
+  }
+
+  const payload = {
+    title,
+    raw_content: raw,
+    excerpt,
+    status,
+    pinned
+  };
+
+  try{
+    if(editingArticleId){
+      await fetch(`${API_BASE}/api/articles/${editingArticleId}`,{
+        method:"PUT",
+        headers:{ "X-Session-Id":sessionId,"Content-Type":"application/json"},
+        body:JSON.stringify(payload)
+      });
+    }else{
+      await fetch(`${API_BASE}/api/articles`,{
+        method:"POST",
+        headers:{ "X-Session-Id":sessionId,"Content-Type":"application/json"},
+        body:JSON.stringify(payload)
+      });
+    }
+
+    document.getElementById("editorModal").classList.add("hidden");
+    loadArticles();
+
+  }catch{ showToast("editorToast","保存失败"); }
+}
+
+document.getElementById("saveDraftBtn").onclick=()=>save("draft");
+document.getElementById("publishBtn").onclick=()=>save("published");
+
+
+/* ------------------ 上传 ------------------- */
+document.getElementById("imageBtn").onclick=()=>document.getElementById("imageInput").click();
+document.getElementById("fileBtn").onclick=()=>document.getElementById("fileInput").click();
+
+function insertMD(md){
+  const ta = document.getElementById("articleContent");
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  ta.value = ta.value.slice(0,s) + md + ta.value.slice(e);
+}
+
+document.getElementById("imageInput").onchange = async(e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+
+  if(f.size <= MAX_INLINE_FILE_BYTES){
+    // base64 fallback
+    const reader = new FileReader();
+    reader.onload=()=>{ insertMD(`\n![${f.name}](${reader.result})\n`); };
+    reader.readAsDataURL(f);
+    return;
+  }
+
+  const form = new FormData();
+  form.append("file", f);
+
+  try{
+    const res = await fetch(`${API_BASE}/api/upload`,{
+      method:"POST",
+      headers:{ "X-Session-Id":sessionId },
+      body:form
+    });
+    const j = await res.json();
+    if(j.url){
+      insertMD(`\n![${f.name}](${j.url})\n`);
+      return;
+    }
+  }catch{}
+  showToast("editorToast","上传失败，请检查 Worker 是否配置 GitHub 上传");
+};
+
+document.getElementById("fileInput").onchange = async(e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+
+  const form = new FormData();
+  form.append("file", f);
+
+  try{
+    const res = await fetch(`${API_BASE}/api/upload`,{
+      method:"POST",
+      headers:{ "X-Session-Id":sessionId },
+      body:form
+    });
+    const j = await res.json();
+    if(j.url){
+      insertMD(`\n[${f.name}](${j.url})\n`);
+      return;
+    }
+  }catch{}
+  showToast("editorToast","上传失败");
+};
+
+
+/* ------------------ INIT ------------------- */
+checkAuth();
+
+</script>
+</body>
+</html>
