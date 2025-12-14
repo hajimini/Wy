@@ -1,566 +1,2007 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>我的笔记 / 博客</title>
-<style>
-  body {
-    margin: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", Helvetica, Arial;
-    background: #0b1220;
-    color: #e6eef8;
-  }
-  .hidden { display: none !important; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Studio - 个人博客</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+    <style>
+        * { font-family: 'Inter', 'PingFang SC', 'HarmonyOS Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
+        code, pre { font-family: 'Fira Code', monospace; }
+        
+        :root {
+            --bg-gradient-start: #f5f3ff;
+            --bg-gradient-end: #f0fdfa;
+            --card-bg: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --nav-bg: rgba(255, 255, 255, 0.7);
+            --accent-purple: #a78bfa;
+            --border-color: #e5e7eb;
+        }
+        
+        .dark {
+            --bg-gradient-start: #1a1625;
+            --bg-gradient-end: #0f172a;
+            --card-bg: #1e1b2e;
+            --text-primary: #f3f4f6;
+            --text-secondary: #d1d5db;
+            --text-muted: #9ca3af;
+            --nav-bg: rgba(30, 27, 46, 0.8);
+            --border-color: #374151;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+        
+        .glass-nav {
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .dark .glass-nav { border: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        .card-shadow {
+            box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .card-shadow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px -6px rgba(0, 0, 0, 0.12);
+        }
+        
+        .dark .card-shadow { box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.3); }
+        
+        .me-circle {
+            background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 50%, #8b5cf6 100%);
+            box-shadow: 0 0 60px rgba(167, 139, 250, 0.4), 0 0 100px rgba(167, 139, 250, 0.2);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 60px rgba(167, 139, 250, 0.4), 0 0 100px rgba(167, 139, 250, 0.2); }
+            50% { box-shadow: 0 0 80px rgba(167, 139, 250, 0.5), 0 0 120px rgba(167, 139, 250, 0.3); }
+        }
+        
+        .toggle-switch {
+            background: linear-gradient(135deg, #e0e5ec, #f5f5f5);
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.9);
+        }
+        
+        .dark .toggle-switch {
+            background: linear-gradient(135deg, #2d2d3a, #1a1a24);
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.3), inset -2px -2px 5px rgba(255, 255, 255, 0.05);
+        }
+        
+        .toggle-knob {
+            background: linear-gradient(135deg, #ffffff, #e8e8e8);
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+        }
+        
+        .dark .toggle-knob {
+            background: linear-gradient(135deg, #4c4c6d, #2d2d3a);
+            transform: translateX(24px);
+        }
+        
+        .filter-container { background-color: #e5e7eb; }
+        .dark .filter-container { background-color: #374151; }
+        .filter-slider { background-color: #ffffff; transition: transform 0.3s ease, width 0.3s ease; }
+        .dark .filter-slider { background-color: #4b5563; }
+        
+        .fade-in { animation: fadeIn 0.5s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .animate-modal-in { animation: modalIn 0.3s ease-out forwards; }
+        
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(to right, #8b5cf6, #a78bfa);
+            z-index: 100;
+            transition: width 0.1s ease;
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 50;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.5);
+        }
+        
+        .toc-container {
+            position: sticky;
+            top: 6rem;
+            max-height: calc(100vh - 8rem);
+            overflow-y: auto;
+        }
 
-  header {
-    display: flex;
-    justify-content: space-between;
-    padding: 14px 18px;
-    background: #071023;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.35);
-    position: sticky;
-    top: 0;
-    z-index: 99;
-  }
+        /* TOC 收起：真正把侧栏宽度压到 0，避免“按钮出现但目录仍占位” */
+        #tocSidebar { flex-shrink: 0; }
+        #tocSidebar.toc-collapsed { width: 0 !important; border-left: 0 !important; overflow: hidden !important; }
+        #tocSidebar.toc-collapsed .toc-container { display: none !important; }
+        
+        .toc-item {
+            display: block;
+            padding: 0.5rem 1rem;
+            border-left: 2px solid transparent;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .toc-item:hover {
+            color: var(--text-primary);
+            border-left-color: #a78bfa;
+        }
+        
+        .toc-item.active {
+            color: #8b5cf6;
+            border-left-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.1);
+        }
+        
+        .toc-item.level-2 { padding-left: 1.5rem; }
+        .toc-item.level-3 { padding-left: 2rem; font-size: 0.8rem; }
+        
+        .prose pre {
+            position: relative;
+            border-radius: 0.75rem;
+            margin: 1.5rem 0;
+            padding: 0 !important;
+            overflow: hidden;
+        }
+        
+        .prose pre code {
+            display: block;
+            padding: 1rem 1.25rem;
+            overflow-x: auto;
+            font-size: 0.875rem;
+            line-height: 1.7;
+        }
+        
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .code-lang {
+            font-size: 0.75rem;
+            color: #a78bfa;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .code-copy {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            color: #9ca3af;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .code-copy:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .prose p { margin-bottom: 1rem; }
+        .prose h1, .prose h2, .prose h3 { font-weight: 600; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.75rem; }
+        .prose h1 { font-size: 1.75rem; }
+        .prose h2 { font-size: 1.5rem; }
+        .prose h3 { font-size: 1.25rem; }
+        .prose ul, .prose ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+        .prose ul { list-style-type: disc; }
+        .prose ol { list-style-type: decimal; }
+        .prose li { margin-bottom: 0.5rem; }
+        .prose code:not(pre code) { background: rgba(139, 92, 246, 0.1); padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.875rem; color: #8b5cf6; }
+        .dark .prose code:not(pre code) { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+        .prose blockquote { border-left: 4px solid #a78bfa; padding-left: 1rem; font-style: italic; color: var(--text-muted); margin: 1.5rem 0; }
+        .prose img { max-width: 100%; height: auto; border-radius: 0.5rem; margin: 1rem 0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); cursor: zoom-in; transition: all 0.2s ease; }
+        .prose img:hover { transform: scale(1.02); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); }
+        .prose table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+        .prose th { background: linear-gradient(135deg, #8b5cf6, #a78bfa); color: white; font-weight: 600; padding: 0.75rem 1rem; text-align: left; }
+        .prose td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); }
+        .prose tr:nth-child(even) { background: rgba(139, 92, 246, 0.05); }
+        .dark .prose tr:nth-child(even) { background: rgba(139, 92, 246, 0.1); }
+        
+        .editor-mode-btn { color: var(--text-muted); background: transparent; }
+        .editor-mode-btn.active { color: var(--text-primary); background: white; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+        .dark .editor-mode-btn.active { background: #374151; }
+        .editor-mode-container { background-color: #e5e7eb; }
+        .dark .editor-mode-container { background-color: #374151; }
+        
+        .toolbar-btn {
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 6px; color: var(--text-secondary);
+            transition: all 0.2s ease; cursor: pointer;
+        }
+        .toolbar-btn:hover { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+        .toolbar-btn.active { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
+        
+        .fullscreen-editor {
+            position: fixed !important;
+            inset: 0 !important;
+            z-index: 100 !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            border-radius: 0 !important;
+        }
+        
+        .fullscreen-editor .editor-content { height: calc(100vh - 180px) !important; }
+        
+        .editor-split { display: flex; height: 100%; }
+        .editor-pane { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+        .preview-pane { flex: 1; overflow-y: auto; border-left: 1px solid var(--border-color); background: var(--card-bg); }
+        .preview-content { padding: 1.5rem; }
+        
+        .input-light { background-color: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb; }
+        .input-light::placeholder { color: #9ca3af; }
+        .input-light:focus { background-color: #ffffff; border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1); }
+        .dark .input-light { background-color: #1f2937; color: #f3f4f6; border-color: #374151; }
+        .dark .input-light:focus { background-color: #111827; border-color: #8b5cf6; }
+        
+        .settings-input { background-color: #ffffff; border: 1px solid #e5e7eb; color: #1f2937; }
+        .settings-input::placeholder { color: #9ca3af; }
+        .settings-input:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1); }
+        .dark .settings-input { background-color: #1f2937; border-color: #374151; color: #f3f4f6; }
+        .dark .settings-input:focus { border-color: #8b5cf6; }
+        
+        .category-btn { background-color: #ffffff; color: #374151; }
+        .dark .category-btn { background-color: #1f2937; color: #e5e7eb; }
 
-  #mainContent { padding: 20px; max-width: 980px; margin: 0 auto; }
+        /* 修复浅色模式下 TOC/侧栏出现灰底的问题 */
+        #tocSidebar { background: #ffffff; }
+        .dark #tocSidebar { background: rgba(17, 24, 39, 0.5); }
 
-  .card {
-    background: #071022;
-    padding: 18px;
-    border-radius: 12px;
-    margin-bottom: 14px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.35);
-  }
+        /* 修复编辑器右侧设置栏浅色模式不该是灰底（更贴近 card-bg） */
+        .editor-settings-pane { background: var(--card-bg); }
+        .dark .editor-settings-pane { background: rgba(17, 24, 39, 0.5); }
 
-  /* 新的登录 UI */
-  #authPage {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg,#0b1220,#071022,#0d1a33);
-    backdrop-filter: blur(6px);
-    z-index: 9999;
-  }
-
-  .auth-box {
-    background: rgba(11,18,32,0.85);
-    padding: 32px;
-    width: 360px;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    animation: fadeIn .5s ease;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* 编辑器 */
-  #editorModal {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,.6);
-    z-index: 2000;
-  }
-
-  .editor-box {
-    background: #071022;
-    padding: 20px;
-    width: 90%;
-    max-width: 880px;
-    border-radius: 14px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-  }
-
-  textarea {
-    width: 100%;
-    height: 260px;
-    margin-top: 12px;
-    padding: 12px;
-    background: #061427;
-    color: #e6eef8;
-    border: 1px solid #123;
-    border-radius: 8px;
-    font-size: 15px;
-    resize: vertical;
-  }
-
-  input[type=text], input[type=password] {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid #1f2a45;
-    background: #071022;
-    color: #e6eef8;
-    font-size: 15px;
-  }
-
-  .btn {
-    padding: 8px 12px;
-    background: #0b2740;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    color: white;
-    transition: 0.25s;
-  }
-  .btn:hover { background: #0e3555; }
-
-  #tocSidebar {
-    position: fixed;
-    right: 0;
-    top: 64px;
-    width: 260px;
-    background: #071422;
-    padding: 10px;
-    border-left: 1px solid #123;
-    max-height: 80vh;
-    overflow-y: auto;
-  }
-  #tocSidebar.toc-collapsed { width: 48px; }
-
-  .small { font-size: 12px; color:#9fb6c9; }
-  .link { color:#7fd1ff; }
-
-</style>
+        /* 修复浅色模式下首页标签文字对比度不足（尤其蓝/绿/黄） */
+        .tag-pill { filter: saturate(1.15) contrast(1.05); }
+        .tag-pill { text-shadow: 0 0 0 rgba(0,0,0,0); }
+        /* 特别加强浅色模式下彩色标签的文字对比度（防止“发白看不清”） */
+        :root .tag-pill.bg-blue-100 { color: #1d4ed8; }
+        :root .tag-pill.bg-green-100 { color: #047857; }
+        :root .tag-pill.bg-amber-100 { color: #92400e; }
+        :root .tag-pill.bg-red-100 { color: #b91c1c; }
+        :root .tag-pill.bg-cyan-100 { color: #0e7490; }
+        
+        .close-btn-light { background-color: #f3f4f6; color: #4b5563; }
+        .close-btn-light:hover { background-color: #e5e7eb; }
+        .dark .close-btn-light { background-color: #374151; color: #d1d5db; }
+        .dark .close-btn-light:hover { background-color: #4b5563; }
+        
+        .status-published { background: rgba(34, 197, 94, 0.1); color: #16a34a; }
+        .dark .status-published { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .status-draft { background: rgba(234, 179, 8, 0.1); color: #ca8a04; }
+        .dark .status-draft { background: rgba(234, 179, 8, 0.2); color: #facc15; }
+        
+        .card-accent { width: 4px; border-radius: 4px; flex-shrink: 0; }
+        .card-accent-purple { background: linear-gradient(to bottom, #8b5cf6, #a78bfa); }
+        .card-accent-green { background: linear-gradient(to bottom, #10b981, #34d399); }
+        .card-accent-blue { background: linear-gradient(to bottom, #3b82f6, #60a5fa); }
+        .card-accent-amber { background: linear-gradient(to bottom, #f59e0b, #fbbf24); }
+        .card-accent-red { background: linear-gradient(to bottom, #ef4444, #f87171); }
+        .card-accent-cyan { background: linear-gradient(to bottom, #06b6d4, #22d3ee); }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.5); }
+        
+        .modal-content { overscroll-behavior: contain; }
+        
+        .toast {
+            position: fixed; bottom: 2rem; left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            color: white; padding: 0.75rem 1.5rem;
+            border-radius: 9999px; font-size: 0.875rem; font-weight: 500;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+            z-index: 200; opacity: 0; transition: all 0.3s ease;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        
+        .loading-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 200;
+        }
+        .loading-spinner {
+            width: 48px; height: 48px;
+            border: 4px solid rgba(139, 92, 246, 0.2);
+            border-top-color: #8b5cf6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .empty-state { text-align: center; padding: 4rem 2rem; }
+        .empty-state-icon { width: 80px; height: 80px; margin: 0 auto 1.5rem; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(167, 139, 250, 0.1)); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .empty-state-icon svg { width: 40px; height: 40px; color: #a78bfa; }
+        
+        .image-viewer { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; cursor: zoom-out; }
+        .image-viewer.active { opacity: 1; visibility: visible; }
+        .image-viewer img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 0.5rem; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); transform: scale(0.9); transition: transform 0.3s ease; }
+        .image-viewer.active img { transform: scale(1); }
+        
+        .autosave-indicator {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.75rem; color: var(--text-muted);
+        }
+        .autosave-indicator.saving { color: #f59e0b; }
+        .autosave-indicator.saved { color: #10b981; }
+        
+        .shortcut-hint {
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            padding: 0.125rem 0.375rem;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 0.25rem;
+            font-size: 0.625rem;
+            color: var(--text-muted);
+        }
+        .dark .shortcut-hint { background: rgba(255, 255, 255, 0.1); }
+        
+        .related-article {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; border-radius: 0.75rem;
+            transition: all 0.2s ease; cursor: pointer;
+        }
+        .related-article:hover { background: rgba(139, 92, 246, 0.1); }
+        
+        .pin-badge {
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            padding: 0.125rem 0.5rem;
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white; font-size: 0.625rem; font-weight: 600;
+            border-radius: 9999px;
+        }
+        
+        .reading-time {
+            display: inline-flex; align-items: center; gap: 0.375rem;
+            font-size: 0.75rem; color: var(--text-muted);
+        }
+        
+        .article-item { transition: all 0.2s ease; }
+        .article-item:hover { background: rgba(139, 92, 246, 0.05); }
+        .dark .article-item:hover { background: rgba(139, 92, 246, 0.1); }
+        
+        .tab-btn { position: relative; transition: all 0.2s ease; }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: linear-gradient(to right, #8b5cf6, #a78bfa); border-radius: 2px; }
+        
+        .drop-zone-active { background: rgba(139, 92, 246, 0.1) !important; border: 2px dashed #8b5cf6 !important; }
+        
+        .file-attachment {
+            display: inline-flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(167, 139, 250, 0.1));
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 0.75rem; color: #8b5cf6;
+            font-size: 0.875rem; cursor: pointer;
+            transition: all 0.2s ease; margin: 0.5rem 0;
+        }
+        .file-attachment:hover { background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(167, 139, 250, 0.2)); transform: translateY(-2px); }
+        .dark .file-attachment { background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(167, 139, 250, 0.2)); color: #a78bfa; }
+        
+        /* 密码验证页面样式 */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+        }
+        
+        .auth-card {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+        
+        .auth-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 40px rgba(139, 92, 246, 0.3);
+        }
+        
+        .auth-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+        
+        .auth-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+        }
+        
+        .auth-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+        }
+        
+        .auth-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .auth-error {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+    </style>
 </head>
-<body>
-
-<!-- 登录页面（新版 UI） -->
-<div id="authPage">
-  <div class="auth-box">
-    <h2 style="margin:0 0 20px;text-align:center;color:#e6eef8;font-weight:600">
-      访问受限
-    </h2>
-
-    <p style="margin:0 0 16px;text-align:center;color:#9fb6c9;">
-      请输入访问密码继续浏览内容
-    </p>
-
-    <input id="passwordInput" placeholder="输入访问密码" type="password">
-
-    <button id="loginBtn" class="btn" style="width: 100%;margin-top:16px;">
-      登录
-    </button>
-
-    <div id="authToast" class="small" style="text-align:center;height:20px;margin-top:8px"></div>
-  </div>
-</div>
-
-<!-- 主区域 -->
-<div id="mainContent" class="hidden">
-  <header>
-    <div>记录代码之外的思考...</div>
-    <div>
-      <button id="newArticleBtn" class="btn">新建</button>
-      <button id="logoutBtn" class="btn">退出</button>
-    </div>
-  </header>
-
-  <main id="articleList"></main>
-</div>
-
-<!-- 编辑器 -->
-<div id="editorModal" class="hidden">
-  <div class="editor-box">
-    <input id="articleTitle" placeholder="文章标题 (必填)">
-
-    <div class="toolbar" style="margin-top:12px;display:flex;gap:8px;">
-      <button id="imageBtn" class="btn">上传图片</button>
-      <button id="fileBtn" class="btn">上传文件</button>
-      <button id="saveDraftBtn" class="btn">保存草稿</button>
-      <button id="publishBtn" class="btn">发布</button>
-      <button id="closeEditorBtn" class="btn">取消</button>
+<body class="transition-colors duration-300">
+    <!-- 密码验证页面 -->
+    <div id="authPage" class="auth-container fixed inset-0 z-[200]">
+        <div class="auth-card animate-modal-in">
+            <div class="auth-logo">
+                <span class="text-white text-3xl font-bold">B</span>
+            </div>
+            <h1 class="text-2xl font-bold text-center text-[var(--text-primary)] mb-2">My Studio</h1>
+            <p class="text-center text-[var(--text-muted)] mb-8">请输入访问密码</p>
+            
+            <form id="authForm" class="space-y-4">
+                <div>
+                    <input type="password" id="passwordInput" class="auth-input" placeholder="输入密码..." autocomplete="off" autofocus>
+                    <p id="authError" class="auth-error hidden"></p>
+                </div>
+                <button type="submit" id="authBtn" class="auth-btn">
+                    <span id="authBtnText">进入博客</span>
+                </button>
+            </form>
+            
+            <p class="text-center text-[var(--text-muted)] text-sm mt-6">
+                🙈 
+            </p>
+        </div>
     </div>
 
-    <textarea id="articleContent" placeholder="Markdown 内容"></textarea>
+    <!-- 主内容（初始隐藏） -->
+    <div id="mainContent" class="hidden">
+        <!-- 阅读进度条 -->
+        <div id="readingProgress" class="reading-progress" style="width: 0%"></div>
+        
+        <!-- 返回顶部按钮 -->
+        <button id="backToTop" class="back-to-top">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+            </svg>
+        </button>
 
-    <input id="articleExcerpt" placeholder="文章摘要 (选填)" style="margin-top:12px;">
+        <!-- 导航栏 -->
+        <nav class="fixed top-6 left-1/2 -translate-x-1/2 z-50 glass-nav rounded-full px-6 py-3 flex items-center justify-between gap-8 min-w-[320px] md:min-w-[500px]">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-lg">B</span>
+                </div>
+                <div>
+                    <h1 class="font-bold text-[var(--text-primary)]">My Studio</h1>
+                    <p class="text-xs text-[var(--text-muted)]">Work notes & life moments</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="themeToggle" class="toggle-switch w-14 h-7 rounded-full relative cursor-pointer">
+                    <div class="toggle-knob w-5 h-5 rounded-full absolute top-1 left-1 flex items-center justify-center">
+                        <svg id="sunIcon" class="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/>
+                        </svg>
+                        <svg id="moonIcon" class="w-3 h-3 text-indigo-400 hidden" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                        </svg>
+                    </div>
+                </button>
+                <button id="editorBtn" class="w-9 h-9 rounded-full bg-[var(--card-bg)] flex items-center justify-center shadow-md hover:shadow-lg transition-all cursor-pointer">
+                    <svg class="w-5 h-5 text-[var(--text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </button>
+                <button id="logoutBtn" class="w-9 h-9 rounded-full bg-[var(--card-bg)] flex items-center justify-center shadow-md hover:shadow-lg transition-all cursor-pointer" title="退出登录">
+                    <svg class="w-5 h-5 text-[var(--text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                </button>
+            </div>
+        </nav>
 
-    <div style="margin-top:8px">
-      <label><input type="checkbox" id="pinArticle"> 置顶</label>
+        <!-- 主内容区 -->
+        <main class="pt-32 pb-20 px-6 max-w-6xl mx-auto">
+            <!-- Hero Section -->
+            <section class="flex flex-col lg:flex-row items-center justify-between gap-12 mb-20">
+                <div class="flex-1 fade-in">
+                    <h2 class="text-4xl md:text-5xl font-bold text-[var(--text-primary)] mb-6 leading-tight">
+                        记录工作之外的思考...
+                    </h2>
+                    <p class="text-lg text-[var(--text-secondary)] mb-8 leading-relaxed">
+                        在这里分享工作复盘、生活中的小确幸与碎片感悟
+                    </p>
+                    <div class="flex flex-wrap gap-3 mb-8">
+                        <span class="px-4 py-2 bg-[var(--card-bg)] text-[var(--text-secondary)] rounded-full text-sm shadow-sm">🖥️ 重大工程</span>
+                        <span class="px-4 py-2 bg-[var(--card-bg)] text-[var(--text-secondary)] rounded-full text-sm shadow-sm">💭 工作思考</span>
+                        <span class="px-4 py-2 bg-[var(--card-bg)] text-[var(--text-secondary)] rounded-full text-sm shadow-sm">🌿 生活记录</span>
+                    </div>
+                    <p class="text-[var(--text-muted)] italic text-lg">"Keep the interface clean, and the mind clearer"</p>
+                </div>
+                <div class="flex-shrink-0 fade-in" style="animation-delay: 0.2s;">
+                    <div class="me-circle w-48 h-48 md:w-64 md:h-64 rounded-full flex items-center justify-center">
+                        <span class="text-white text-4xl md:text-5xl font-bold tracking-wider">Me</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 文章区域 -->
+            <section>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+                    <h3 class="text-2xl font-bold text-[var(--text-primary)]">最近的记录</h3>
+                    <div class="filter-container rounded-full p-1 flex relative">
+                        <div id="filterSlider" class="filter-slider absolute h-8 rounded-full shadow-md top-1 left-1"></div>
+                        <button data-filter="all" class="filter-btn relative z-10 px-4 py-1.5 rounded-full text-sm font-medium text-[var(--text-primary)] transition-colors">全部</button>
+                        <button data-filter="work" class="filter-btn relative z-10 px-4 py-1.5 rounded-full text-sm font-medium text-[var(--text-muted)] transition-colors">工作思考</button>
+                        <button data-filter="life" class="filter-btn relative z-10 px-4 py-1.5 rounded-full text-sm font-medium text-[var(--text-muted)] transition-colors">生活记录</button>
+                    </div>
+                </div>
+                <div id="articlesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </section>
+        </main>
+
+        <footer class="text-center py-8 text-[var(--text-muted)] text-sm">
+            <p>© 2025 My Studio · Built with 🙈</p>
+        </footer>
     </div>
 
-    <div id="editorToast" class="small" style="margin-top:8px;color:#f4b3b3"></div>
-  </div>
-</div>
+    <!-- 文章预览模态框 -->
+    <div id="articleModal" class="fixed inset-0 bg-black/50 z-[60] hidden items-center justify-center p-4" style="backdrop-filter: blur(8px);">
+        <div class="bg-[var(--card-bg)] rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl animate-modal-in flex relative">
+            <div id="articleReadingProgress" class="absolute top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 z-10">
+                <div id="articleProgressBar" class="h-full bg-gradient-to-r from-violet-500 to-purple-500 transition-all duration-150" style="width: 0%"></div>
+            </div>
+            
+            <div class="flex-1 flex flex-col min-w-0 pt-1">
+                <div class="p-6 border-b border-[var(--border-color)]">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-3 flex-wrap">
+                                <span id="modalPinBadge" class="pin-badge hidden">📌 置顶</span>
+                                <span id="modalTag" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                                    <span id="modalTagText"></span>
+                                </span>
+                                <span id="modalCategory" class="text-xs text-[var(--text-muted)]"></span>
+                                <span class="text-[var(--text-muted)]">·</span>
+                                <span id="modalDate" class="text-xs text-[var(--text-muted)]"></span>
+                                <span class="text-[var(--text-muted)]">·</span>
+                                <span id="modalReadingTime" class="reading-time">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span></span>
+                                </span>
+                            </div>
+                            <h2 id="modalTitle" class="text-2xl md:text-3xl font-bold text-[var(--text-primary)]"></h2>
+                        </div>
+                        <button id="closeArticle" class="w-10 h-10 rounded-full close-btn-light flex items-center justify-center transition-colors cursor-pointer flex-shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto custom-scrollbar modal-content p-6 md:p-8">
+                    <article id="modalContent" class="prose max-w-none text-[var(--text-secondary)] leading-relaxed"></article>
+                    
+                    <div id="relatedArticles" class="mt-12 pt-8 border-t border-[var(--border-color)]">
+                        <h4 class="text-lg font-bold text-[var(--text-primary)] mb-4">📚 相关推荐</h4>
+                        <div id="relatedList" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="tocToggleBtn" class="hidden absolute right-4 top-20 w-10 h-10 rounded-full bg-[var(--card-bg)] shadow-lg border border-[var(--border-color)] flex items-center justify-center cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors z-20" title="展开目录">
+                <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+            </button>
+            
+            <div id="tocSidebar" class="hidden lg:block w-64 border-l border-[var(--border-color)] bg-white dark:bg-gray-900/50 transition-all duration-300">
+                <div class="toc-container p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                            目录
+                        </h4>
+                        <button id="tocCollapseBtn" class="w-7 h-7 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center transition-colors cursor-pointer" title="收起目录">
+                            <svg class="w-4 h-4 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                    <div id="tocList" class="space-y-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- 隐藏文件控件 -->
-<input id="imageInput" type="file" accept="image/*" hidden>
-<input id="fileInput" type="file" accept=".pdf,.doc,.docx,.zip,.txt" hidden>
+    <!-- 编辑器模态框（简化版本，保留核心功能） -->
+    <div id="editorModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" style="backdrop-filter: blur(8px);">
+        <div id="editorContainer" class="bg-[var(--card-bg)] rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden shadow-2xl animate-modal-in flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-[var(--border-color)]">
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button id="tabCreate" class="tab-btn active px-4 py-2 text-sm font-medium text-[var(--text-primary)] cursor-pointer">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                创作文章
+                            </span>
+                        </button>
+                        <button id="tabManage" class="tab-btn px-4 py-2 text-sm font-medium text-[var(--text-muted)] cursor-pointer">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                文章管理
+                            </span>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div id="autosaveIndicator" class="autosave-indicator hidden">
+                        <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span>自动保存中...</span>
+                    </div>
+                    <button id="toggleFullscreen" class="w-9 h-9 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center transition-colors cursor-pointer" title="全屏模式">
+                        <svg class="w-5 h-5 text-[var(--text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                        </svg>
+                    </button>
+                    <button id="closeEditor" class="w-9 h-9 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center transition-colors cursor-pointer">
+                        <svg class="w-5 h-5 text-[var(--text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 创作面板 -->
+            <div id="createPanel" class="flex-1 flex flex-col overflow-hidden">
+                <div class="flex flex-col lg:flex-row flex-1 overflow-hidden">
+                    <div class="flex-1 flex flex-col min-w-0 border-r border-[var(--border-color)]">
+                        <div class="p-4 border-b border-[var(--border-color)]">
+                            <input id="articleTitle" type="text" placeholder="输入文章标题..." 
+                                class="w-full text-2xl font-bold bg-transparent border-0 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none">
+                        </div>
+                        
+                        <div class="px-4 py-2 border-b border-[var(--border-color)] flex items-center justify-between flex-wrap gap-2">
+                            <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-1 editor-mode-container rounded-lg p-1">
+                                    <button id="markdownMode" class="editor-mode-btn active px-3 py-1.5 rounded-md text-sm font-medium transition-all cursor-pointer">Markdown</button>
+                                    <button id="richTextMode" class="editor-mode-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all cursor-pointer">纯文本</button>
+                                </div>
+                                <button id="togglePreview" class="toolbar-btn" title="切换预览">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-3 text-xs text-[var(--text-muted)]">
+                                <span><span id="charCount">0</span> 字</span>
+                                <span>·</span>
+                                <span id="readingTimeEstimate">约 0 分钟</span>
+                            </div>
+                        </div>
+                        
+                        <div id="markdownToolbar" class="px-4 py-2 border-b border-[var(--border-color)] flex items-center gap-1 flex-wrap">
+                            <button class="toolbar-btn" data-action="bold" title="加粗"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z"/></svg></button>
+                            <button class="toolbar-btn" data-action="italic" title="斜体"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 4h4m-2 0v16m4-16h-4m-4 16h8"/></svg></button>
+                            <button class="toolbar-btn" data-action="h2" title="标题"><span class="font-bold text-sm">H</span></button>
+                            <button class="toolbar-btn" data-action="ul" title="列表"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+                            <button class="toolbar-btn" data-action="quote" title="引用"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg></button>
+                            <button class="toolbar-btn" data-action="code" title="代码"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg></button>
+                            <button class="toolbar-btn" data-action="link" title="链接"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg></button>
+                            <button class="toolbar-btn" data-action="image" title="图片"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></button>
+                            <button class="toolbar-btn" data-action="file" title="附件"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828L18 9.828a4 4 0 10-5.656-5.656L6.343 10.172a6 6 0 108.485 8.485L20.5 13"/></svg></button>
+                            <button class="toolbar-btn" data-action="table" title="表格"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button>
+                            <input type="file" id="imageInput" accept="image/*" class="hidden" multiple>
+                            <input type="file" id="fileInput" class="hidden" multiple>
+                        </div>
+                        
+                        <div class="editor-split flex-1 overflow-hidden">
+                            <div class="editor-pane">
+                                <textarea id="articleContent" placeholder="开始写作... (支持 Markdown 语法)" 
+                                    class="w-full h-full p-4 bg-transparent border-0 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none resize-none font-mono text-sm leading-relaxed"></textarea>
+                            </div>
+                            <div id="previewPane" class="preview-pane hidden">
+                                <div id="livePreview" class="preview-content prose max-w-none text-[var(--text-secondary)]"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full lg:w-72 flex flex-col editor-settings-pane overflow-y-auto custom-scrollbar">
+                        <div class="p-4 space-y-5">
+                            <div>
+                                <label class="block text-sm font-medium text-[var(--text-primary)] mb-3">文章分类</label>
+                                <div class="flex gap-2">
+                                    <button id="categoryWork" class="category-btn flex-1 px-4 py-3 rounded-xl border-2 border-purple-400 text-[var(--text-primary)] font-medium transition-all cursor-pointer" data-category="work">
+                                        <span class="flex items-center justify-center gap-2">💼 工作思考</span>
+                                    </button>
+                                    <button id="categoryLife" class="category-btn flex-1 px-4 py-3 rounded-xl border-2 border-transparent text-[var(--text-secondary)] font-medium transition-all hover:border-gray-300 cursor-pointer" data-category="life">
+                                        <span class="flex items-center justify-center gap-2">🌿 生活记录</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-[var(--text-primary)] mb-3">文章标签</label>
+                                <div class="flex flex-wrap gap-2 mb-3">
+                                    <button class="tag-option px-3 py-1.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 ring-2 ring-purple-400" data-tag="前端">前端</button>
+                                    <button class="tag-option px-3 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" data-tag="技术">技术</button>
+                                    <button class="tag-option px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300" data-tag="读书">读书</button>
+                                    <button class="tag-option px-3 py-1.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" data-tag="日常">日常</button>
+                                </div>
+                                <input id="customTag" type="text" placeholder="自定义标签..." class="settings-input w-full px-3 py-2 rounded-lg text-sm outline-none">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-[var(--text-primary)] mb-3">文章摘要</label>
+                                <textarea id="articleExcerpt" rows="3" placeholder="简短描述（留空自动生成）" class="settings-input w-full px-3 py-2 rounded-lg text-sm outline-none resize-none"></textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" id="pinArticle" class="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                                    <span class="text-sm font-medium text-[var(--text-primary)]">📌 置顶文章</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="createFooter" class="p-4 border-t border-[var(--border-color)] flex items-center justify-between bg-[var(--card-bg)]">
+                    <div class="flex items-center gap-3">
+                        <button id="saveDraft" class="flex items-center gap-2 px-4 py-2 rounded-xl text-[var(--text-secondary)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                            <span class="text-sm">存为草稿</span>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button id="cancelBtn" class="px-5 py-2.5 rounded-xl text-[var(--text-secondary)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-medium cursor-pointer">取消</button>
+                        <button id="publishBtn" class="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-500 text-white font-medium hover:opacity-90 transition-opacity shadow-lg cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            <span id="publishBtnText">发布文章</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 文章管理面板 -->
+            <div id="managePanel" class="hidden flex-1 flex flex-col overflow-hidden">
+                <div class="p-4 border-b border-[var(--border-color)] flex flex-col sm:flex-row gap-4">
+                    <div class="flex-1 relative">
+                        <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <input id="searchArticle" type="text" placeholder="搜索文章..." class="input-light w-full pl-10 pr-4 py-2.5 rounded-xl outline-none">
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="filterStatus" class="input-light px-4 py-2.5 rounded-xl outline-none cursor-pointer">
+                            <option value="all">全部状态</option>
+                            <option value="published">已发布</option>
+                            <option value="draft">草稿</option>
+                        </select>
+                        <select id="filterCategory" class="input-light px-4 py-2.5 rounded-xl outline-none cursor-pointer">
+                            <option value="all">全部分类</option>
+                            <option value="work">工作思考</option>
+                            <option value="life">生活记录</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto custom-scrollbar modal-content">
+                    <div id="articleList" class="divide-y divide-gray-100 dark:divide-gray-800"></div>
+                </div>
+                
+                <div class="p-4 border-t border-[var(--border-color)] flex items-center justify-between text-sm text-[var(--text-muted)]">
+                    <div class="flex items-center gap-4">
+                        <span>共 <span id="totalCount" class="font-medium text-[var(--text-primary)]">0</span> 篇</span>
+                        <span>已发布 <span id="publishedCount" class="font-medium text-green-600">0</span></span>
+                        <span>草稿 <span id="draftCount" class="font-medium text-amber-600">0</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 确认删除模态框 -->
+    <div id="deleteModal" class="fixed inset-0 bg-black/50 z-[70] hidden items-center justify-center p-4">
+        <div class="bg-[var(--card-bg)] rounded-2xl w-full max-w-md p-6 shadow-2xl animate-modal-in">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-[var(--text-primary)]">确认删除</h3>
+                    <p class="text-sm text-[var(--text-muted)]">此操作不可恢复</p>
+                </div>
+            </div>
+            <p class="text-[var(--text-secondary)] mb-6">确定要删除「<span id="deleteArticleTitle" class="font-medium text-[var(--text-primary)]"></span>」吗？</p>
+            <div class="flex justify-end gap-3">
+                <button id="cancelDelete" class="px-5 py-2.5 rounded-xl text-[var(--text-secondary)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-medium cursor-pointer">取消</button>
+                <button id="confirmDelete" class="px-5 py-2.5 rounded-xl bg-red-500 text-white font-medium hover:bg-red-600 transition-colors cursor-pointer">确认删除</button>
+            </div>
+        </div>
+    </div>
 
-<!-- TOC -->
-<div id="tocSidebar" class="hidden">
-  <button id="tocCollapseBtn" class="btn small">≡</button>
-  <div id="tocList" style="margin-top:10px"></div>
-</div>
+    <!-- 图片查看器 -->
+    <div id="imageViewer" class="image-viewer">
+        <img id="viewerImage" src="" alt="">
+    </div>
 
-<script>
-/* ------------------ CONFIG ------------------- */
-const API_BASE = (()=>{
-  const param = new URLSearchParams(location.search).get("api_base");
-  if(param){
-    localStorage.setItem("apiBaseOverride", param);
-    return param;
-  }
-  return localStorage.getItem("apiBaseOverride") || "";
-})();
-const SESSION_LIFETIME_MS = 10 * 60 * 1000;
-const MAX_INLINE_FILE_BYTES = 800 * 1024;
+    <script>
+        // ===== 配置 =====
+        // 部署后将此URL改为您的 Worker 地址（不要以斜杠结尾）
+        const API_BASE = 'https://my-studio-api.hajimi.workers.dev';
+        const API_ROOT = String(API_BASE || '').replace(/\/+$/, '');
+        const api = (path) => `${API_ROOT}${(path || '').startsWith('/') ? path : '/' + path}`;
+        
+        // 线上部署：默认不启用本地模式（仅在无法访问 API 时才切换）
+        let USE_LOCAL_MODE = false;
+        
+        // 会话信息
+        let sessionId = localStorage.getItem('sessionId');
+        let sessionExpiresAt = localStorage.getItem('sessionExpiresAt');
+        
+        // ===== 数据 =====
+        // 部署环境下不再使用本地示例数据，完全依赖 API；离线开发模式使用 LocalStorage
+        let articles = [];
 
-let sessionId = null;
-let articles = [];
-let editingArticleId = null;
+        const tagColors = { purple: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300', green: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300', blue: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300', amber: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300', red: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300', cyan: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300' };
+        const accentColors = { purple: 'card-accent-purple', green: 'card-accent-green', blue: 'card-accent-blue', amber: 'card-accent-amber', red: 'card-accent-red', cyan: 'card-accent-cyan' };
+        const tagColorMap = { '前端': 'purple', '技术': 'blue', '读书': 'green', '日常': 'amber', '性能': 'red', '随笔': 'cyan' };
+        
+        let editingArticleId = null;
+        // sessionId/sessionExpiresAt 已在上方定义
+        let isPreviewMode = false;
 
-/* ------------------ UTIL ------------------- */
-function showToast(id, msg, timeout=3000){
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.textContent = msg;
-  setTimeout(()=>{ if(el.textContent === msg) el.textContent = ""; }, timeout);
-}
+        // ===== 本地开发存储 =====
+        const LS_ARTICLES_KEY = 'dev_articles';
+        function getLocalArticles() {
+            try { return JSON.parse(localStorage.getItem(LS_ARTICLES_KEY) || '[]'); } catch { return []; }
+        }
+        function setLocalArticles(list) {
+            localStorage.setItem(LS_ARTICLES_KEY, JSON.stringify(list || []));
+        }
+        
+        // ===== 认证 =====
+        // 安全策略：
+        // 1) 刷新页面必须重新登录（不使用持久 session）
+        // 2) 5 分钟无操作自动退出
+        const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
+        const LS_LAST_ACTIVE_KEY = 'lastActiveAt';
 
-function escapeHtml(s){
-  return String(s||"")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#39;");
-}
+        function touchActivity() {
+            const now = Date.now();
+            localStorage.setItem(LS_LAST_ACTIVE_KEY, String(now));
+        }
 
-  /* markdown renderer */
-  function mdToHtml(md){
-    if(!md) return "";
-    let safe = escapeHtml(md);
+        function isInactive() {
+            const v = localStorage.getItem(LS_LAST_ACTIVE_KEY);
+            const t = v ? Number(v) : NaN;
+            if (!Number.isFinite(t)) return true;
+            return Date.now() - t > INACTIVITY_TIMEOUT_MS;
+        }
 
-    const placeholders = [];
-    const putPlaceholder = (html)=>{
-      const key = `__MD_PLACEHOLDER_${placeholders.length}__`;
-      placeholders.push({ key, html });
-      return key;
-    };
+        function isSessionExpired() {
+            // 刷新强制重新登录：必须是“本次页面生命周期”刚刚登录过才允许进入。
+            // 任何刷新/新开页面 sessionStorage 都会丢失，所以会被视为过期。
+            if (!sessionId) return true;
+            if (sessionStorage.getItem('pageAuthed') !== '1') return true;
 
-    // 先替换代码块和行内代码，避免后续 markdown 规则污染代码内容
-    safe = safe.replace(/```([\s\S]*?)```/g,(m,c)=>putPlaceholder(`<pre><code>${c}</code></pre>`));
-    safe = safe.replace(/`([^`]+)`/g,(m,c)=>putPlaceholder(`<code>${c}</code>`));
+            // 5 分钟无操作：强制过期
+            if (isInactive()) return true;
 
-    safe = safe.replace(/^### (.*$)/gim,(m,c)=>`<h3>${c}</h3>`);
-    safe = safe.replace(/^## (.*$)/gim,(m,c)=>`<h2>${c}</h2>`);
-    safe = safe.replace(/^# (.*$)/gim,(m,c)=>`<h1>${c}</h1>`);
-    safe = safe.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(m,a,u)=>`<img alt="${a}" src="${u}" style="max-width:100%">`);
-    safe = safe.replace(/\[([^\]]+)\]\(([^)]+)\)/g,(m,a,u)=>`<a class="link" href="${u}" target="_blank" rel="noopener noreferrer">${a}</a>`);
-    safe = safe.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
-    safe = safe.replace(/\*(.+?)\*/g,"<em>$1</em>");
+            // 兼容后端 expiresAt（如果存在则也校验）
+            if (!sessionExpiresAt) return false;
+            const t = Date.parse(sessionExpiresAt);
+            if (!Number.isFinite(t)) return false;
+            return Date.now() > t;
+        }
 
-    // 列表：将连续的 "- " 开头行归并到同一个 <ul>
-    safe = safe.replace(/(^|\n)(?:\s*-\s+.*(?:\n|$))+/g, block => {
-      const lines = block.trim().split(/\n+/).map(l => l.replace(/^\s*-\s+/, ''));
-      const list = lines.filter(Boolean).map(li => `<li>${li}</li>`).join('');
-      const prefix = block.startsWith('\n') ? '\n' : '';
-      return list ? `${prefix}<ul>${list}</ul>` : '';
-    });
+        function clearSession() {
+            localStorage.removeItem('sessionId');
+            localStorage.removeItem('sessionExpiresAt');
+            localStorage.removeItem(LS_LAST_ACTIVE_KEY);
+            sessionStorage.removeItem('pageAuthed');
+            sessionId = null;
+            sessionExpiresAt = null;
+        }
 
-    // 恢复代码块 / 行内代码占位符
-    placeholders.forEach(({ key, html }) => {
-      safe = safe.replace(key, html);
-    });
+        // 刷新必须重新登录：页面关闭/刷新时主动清理持久化 session
+        // 说明：beforeunload 在现代浏览器上不保证 100% 执行，但在常规刷新场景可显著降低“刷新自动登录”。
+        window.addEventListener('beforeunload', () => {
+            try {
+                localStorage.removeItem('sessionId');
+                localStorage.removeItem('sessionExpiresAt');
+                localStorage.removeItem(LS_LAST_ACTIVE_KEY);
+                sessionStorage.removeItem('pageAuthed');
+            } catch (e) {}
+        });
 
-    // 段落换行：双空行分段，单空行转 <br>
-    safe = safe
-      .split(/\n{2,}/)
-      .map(part => {
-        const chunk = part.trim();
-        if(!chunk) return '';
-        const blockLike = /^(<h[1-3]>|<ul>|<pre>)/i.test(chunk);
-        const withBr = chunk.replace(/\n/g,"<br>");
-        return blockLike ? withBr : `<p>${withBr}</p>`;
-      })
-      .join('');
+        async function checkAuth() {
+            // 刷新必须重新登录：bootstrapAuth() 已负责清理 session。
+            // 这里不再做 bootstrapped 判断，避免逻辑互相覆盖导致 UI 闪烁。
 
-    return safe;
-  }
+            // 过期：强制重新登录
+            if (isSessionExpired()) {
+                clearSession();
+                showAuthPage();
+                return;
+            }
 
-/* ------------------ AUTH ------------------- */
-function setSession(sid){
-  sessionId = sid;
-  localStorage.setItem("sessionId", sid);
-  localStorage.setItem("sessionExpiry", Date.now() + SESSION_LIFETIME_MS);
-}
+            // 未登录：显示登录页
+            if (!sessionId) {
+                showAuthPage();
+                return;
+            }
 
-function clearSession(){
-  sessionId = null;
-  localStorage.removeItem("sessionId");
-  localStorage.removeItem("sessionExpiry");
-}
+            try {
+                const res = await fetch(api('/api/auth/check'), {
+                    headers: { 'X-Session-Id': sessionId }
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.authenticated) {
+                    showMainContent();
+                    await loadArticles();
+                } else {
+                    clearSession();
+                    showAuthPage();
+                }
+            } catch (e) {
+                // 刷新必须重新登录的安全策略下：任何网络错误都不要“自动进入首页”
+                // 否则就会出现你说的“登录页闪一下又进首页”的问题。
+                console.warn('Auth check failed:', e?.message || e);
+                clearSession();
+                showAuthPage();
+                showToast('网络异常，请重新登录');
+            }
+        }
+        
+        function showAuthPage() {
+            const auth = document.getElementById('authPage');
+            const main = document.getElementById('mainContent');
+            auth.classList.remove('hidden');
+            main.classList.add('hidden');
+            // 确保 authPage 作为覆盖层显示（避免被后续样式/脚本影响）
+            auth.style.display = 'flex';
+            main.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        function showMainContent() {
+            const auth = document.getElementById('authPage');
+            const main = document.getElementById('mainContent');
+            // 关键修复：不仅加 hidden，还强制 display:none，避免 auth 容器残留占位
+            auth.classList.add('hidden');
+            main.classList.remove('hidden');
+            auth.style.display = 'none';
+            main.style.display = 'block';
+            document.body.style.overflow = '';
+            renderArticles();
+            // 开始无操作检测
+            scheduleInactivityCheck();
+        }
 
-async function checkAuth(){
-  const sid = localStorage.getItem("sessionId");
-  const exp = Number(localStorage.getItem("sessionExpiry") || 0);
+        // ===== 5 分钟无操作自动退出 =====
+        let inactivityTimer = null;
+        function scheduleInactivityCheck() {
+            if (inactivityTimer) return;
+            inactivityTimer = setInterval(() => {
+                const mainVisible = !document.getElementById('mainContent').classList.contains('hidden');
+                if (!mainVisible) return;
+                if (isSessionExpired()) {
+                    // 过期原因：刷新策略/无操作
+                    clearSession();
+                    showAuthPage();
+                    showToast('已自动退出，请重新登录');
+                }
+            }, 1000);
+        }
 
-  if(!sid || Date.now() > exp){
-    showAuth();
-    return;
-  }
+        ['click','keydown','mousemove','touchstart','scroll'].forEach(evt => {
+            window.addEventListener(evt, () => {
+                if (sessionStorage.getItem('pageAuthed') === '1') touchActivity();
+            }, { passive: true });
+        });
+        
+        document.getElementById('authForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const password = document.getElementById('passwordInput').value;
+            const errorEl = document.getElementById('authError');
+            const btn = document.getElementById('authBtn');
+            const btnText = document.getElementById('authBtnText');
 
-  try{
-    const res = await fetch(`${API_BASE}/api/auth/check`,{
-      headers:{ "X-Session-Id":sid }
-    });
-    const j = await res.json();
+            if (!password) {
+                errorEl.textContent = '请输入密码';
+                errorEl.classList.remove('hidden');
+                return;
+            }
 
-    if(res.ok && j.authenticated){
-      sessionId = sid;
-      localStorage.setItem("sessionExpiry", Date.now()+SESSION_LIFETIME_MS);
-      showMain();
-      loadArticles();
-      return;
-    }
-  }catch{}
+            btn.disabled = true;
+            btnText.textContent = '验证中...';
+            errorEl.classList.add('hidden');
 
-  clearSession();
-  showAuth();
-}
+            if (USE_LOCAL_MODE) {
+                sessionId = 'LOCAL_DEV_SESSION';
+                sessionExpiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(); // 本地模式 2 小时
+                localStorage.setItem('sessionId', sessionId);
+                localStorage.setItem('sessionExpiresAt', sessionExpiresAt);
+                showMainContent();
+                await loadArticles();
+                btn.disabled = false;
+                btnText.textContent = '进入博客';
+                return;
+            }
 
-function showAuth(){
-  document.getElementById("authPage").classList.remove("hidden");
-  document.getElementById("mainContent").classList.add("hidden");
-}
+            try {
+                const res = await fetch(api('/api/auth/login'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.sessionId) {
+                    sessionId = data.sessionId;
+                    sessionExpiresAt = data.expiresAt || null;
+                    localStorage.setItem('sessionId', sessionId);
+                    if (sessionExpiresAt) localStorage.setItem('sessionExpiresAt', sessionExpiresAt);
+                    else localStorage.removeItem('sessionExpiresAt');
 
-function showMain(){
-  document.getElementById("authPage").classList.add("hidden");
-  document.getElementById("mainContent").classList.remove("hidden");
-}
+                    sessionStorage.setItem('pageAuthed', '1');
+                    touchActivity();
 
-/* 登录 */
-document.getElementById("loginBtn").onclick = async ()=>{
-  const pwd = document.getElementById("passwordInput").value;
-  try{
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ password:pwd })
-    });
+                    showMainContent();
+                    await loadArticles();
+                } else {
+                    errorEl.textContent = data.error || '密码错误';
+                    errorEl.classList.remove('hidden');
+                }
+            } catch (e) {
+                // 刷新必须重新登录：登录失败时不要进入本地模式（避免误入首页）
+                console.warn('Login failed:', e?.message || e);
+                errorEl.textContent = '网络异常或服务不可用，请稍后重试';
+                errorEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = '进入博客';
+            }
+        };
+        
+        document.getElementById('logoutBtn').onclick = async () => {
+            if (!USE_LOCAL_MODE && sessionId) {
+                try {
+                    await fetch(api('/api/auth/logout'), {
+                        method: 'POST',
+                        headers: { 'X-Session-Id': sessionId }
+                    });
+                } catch (e) {}
+            }
+            clearSession();
+            showAuthPage();
+            document.getElementById('passwordInput').value = '';
+        };
+        
+        // ===== API 操作 =====
+        async function loadArticles() {
+            // 离线模式使用本地
+            if (USE_LOCAL_MODE) {
+                articles = getLocalArticles();
+                renderArticles();
+                return;
+            }
 
-    let j;
-    try{
-      j = await res.json();
-    }catch{
-      const txt = await res.text().catch(()=>"");
-      showToast("authToast", txt || "登录接口返回异常");
-      return;
-    }
+            try {
+                const res = await fetch(api('/api/articles'), {
+                    headers: { 'X-Session-Id': sessionId }
+                });
 
-    if(res.ok){
-      setSession(j.sessionId);
-      showMain();
-      loadArticles();
-    } else {
-      showToast("authToast", j.error || "登录失败");
-    }
-  }catch(e){
-    showToast("authToast", e?.message || "网络错误");
-  }
-};
+                if (res.status === 401) {
+                    clearSession();
+                    showAuthPage();
+                    showToast('会话已失效，请重新登录');
+                    return;
+                }
 
-/* 退出 */
-document.getElementById("logoutBtn").onclick = async ()=>{
-  try{ await fetch(`${API_BASE}/api/auth/logout`,{ method:"POST", headers:{ "X-Session-Id":sessionId } }); }catch{}
-  clearSession();
-  showAuth();
-};
+                if (!res.ok) throw new Error('load articles failed');
+                const data = await res.json();
 
-/* ------------------ ARTICLES ------------------- */
-async function loadArticles(){
-  try{
-    const res = await fetch(`${API_BASE}/api/articles`, {
-      headers:{ "X-Session-Id":sessionId }
-    });
-    const data = await res.json();
-    articles = Array.isArray(data)? data : [];
-    renderArticles();
-  }catch(e){ console.log(e); }
-}
+                articles = (data || []).map(a => ({
+                    id: a.id,
+                    title: a.title,
+                    excerpt: a.excerpt,
+                    rawContent: a.raw_content ?? a.rawContent ?? '',
+                    content: a.content || '',
+                    category: a.category,
+                    tag: a.tag,
+                    tagColor: a.tag_color ?? a.tagColor ?? 'purple',
+                    date: a.date,
+                    status: a.status || 'draft',
+                    pinned: !!a.pinned,
+                    created_at: a.created_at,
+                    updated_at: a.updated_at
+                }));
 
-function renderArticles(){
-  const list = document.getElementById("articleList");
-  list.innerHTML = "";
+                // 兼容：后端可能没存 content（早期数据），前端补一份
+                articles.forEach(a => {
+                    if (a.rawContent && !a.content) a.content = markdownToHtml(a.rawContent);
+                });
 
-  articles.forEach(a=>{
-    const html = mdToHtml(a.raw_content || "");
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `
-      <h2>${escapeHtml(a.title)}</h2>
-      <div class="small">${a.date || ""}</div>
-      <div>${html}</div>
-      <div style="margin-top:12px">
-        <button class="btn" onclick="openEditor(${a.id})">编辑</button>
-        <button class="btn" onclick="deleteArticle(${a.id})">删除</button>
-      </div>`;
-    list.appendChild(div);
-  });
-}
+                renderArticles();
+            } catch (e) {
+                console.warn('Load articles failed, switch to local mode:', e?.message || e);
+                USE_LOCAL_MODE = true;
+                articles = getLocalArticles();
+                renderArticles();
+            }
+        }
+        
+        // ===== Markdown 转 HTML =====
+        function markdownToHtml(md) {
+            if (!md) return '';
+            let html = md;
+            
+            html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+                const language = lang || 'plaintext';
+                const escaped = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return `<pre><div class="code-header"><span class="code-lang">${language}</span><button class="code-copy" onclick="copyCode(this)">复制</button></div><code class="language-${language}">${escaped}</code></pre>`;
+            });
+            
+            html = html.replace(/^\|(.+)\|\s*\n\|[-:\s|]+\|\s*\n((?:\|.+\|\s*\n?)+)/gm, (_, header, body) => {
+                const headers = header.split('|').map(h => h.trim()).filter(h => h);
+                const rows = body.trim().split('\n').map(row => row.split('|').map(c => c.trim()).filter(c => c));
+                let table = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+                rows.forEach(row => { table += '<tr>' + row.map(c => `<td>${c}</td>`).join('') + '</tr>'; });
+                return table + '</tbody></table>';
+            });
+            
+            html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy">');
+            html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+            html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+            html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+            html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
+            html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:#8b5cf6">$1</a>');
+            
+            html = html.split('\n\n').map(p => {
+                p = p.trim();
+                if (!p || /^<(h[123]|blockquote|li|pre|table|div|img)/.test(p)) return p;
+                return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+            }).join('\n');
+            
+            html = html.replace(/(<li>.*<\/li>\n?)+/g, m => '<ul>' + m + '</ul>');
+            return html;
+        }
+        
+        articles.forEach(a => { if (a.rawContent && !a.content) a.content = markdownToHtml(a.rawContent); });
+        
+        function calcReadingTime(text) {
+            const words = text.replace(/[#*`>\-\[\]!|]/g, '').trim().length;
+            return Math.max(1, Math.ceil(words / 400));
+        }
+        
+        // ===== 渲染文章 =====
+        function renderArticles(filter = 'all') {
+            const grid = document.getElementById('articlesGrid');
+            let list = articles.filter(a => a.status === 'published');
+            if (filter !== 'all') list = list.filter(a => a.category === filter);
+            list.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+            
+            if (list.length === 0) {
+                grid.innerHTML = `<div class="empty-state col-span-full"><div class="empty-state-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg></div><h4 class="text-xl font-bold text-[var(--text-primary)] mb-2">暂无文章</h4><p class="text-[var(--text-muted)] mb-4">点击右上角开始创作</p><button onclick="openEditor()" class="px-6 py-2 bg-gradient-to-r from-violet-500 to-purple-500 text-white rounded-full font-medium hover:opacity-90 cursor-pointer">开始创作</button></div>`;
+                return;
+            }
+            
+            grid.innerHTML = list.map((a, i) => `
+                <article class="card-shadow bg-[var(--card-bg)] rounded-xl overflow-hidden cursor-pointer fade-in flex" data-id="${a.id}" style="animation-delay:${i*0.05}s">
+                    <div class="card-accent ${accentColors[a.tagColor]} my-3 ml-3"></div>
+                    <div class="flex-1 p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                ${a.pinned ? '<span class="pin-badge">📌 置顶</span>' : ''}
+                                <span class="tag-pill inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${tagColors[a.tagColor]}">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-current"></span>${a.tag}
+                                </span>
+                            </div>
+                            <span class="text-xs text-[var(--text-muted)]">${a.date}</span>
+                        </div>
+                        <h4 class="font-bold text-[var(--text-primary)] mb-2 line-clamp-2">${a.title}</h4>
+                        <p class="text-sm text-[var(--text-secondary)] line-clamp-2">${a.excerpt}</p>
+                        <div class="mt-2 reading-time"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>${calcReadingTime(a.rawContent || '')} 分钟</span></div>
+                    </div>
+                </article>
+            `).join('');
+            
+            grid.querySelectorAll('article[data-id]').forEach(card => {
+                card.onclick = () => {
+                    const article = articles.find(a => a.id === parseInt(card.dataset.id));
+                    if (article) openArticleModal(article);
+                };
+            });
+        }
+        
+        // ===== 文章预览模态框 =====
+        const articleModal = document.getElementById('articleModal');
+        
+        function openArticleModal(article) {
+            document.getElementById('modalTagText').textContent = article.tag;
+            document.getElementById('modalDate').textContent = article.date;
+            document.getElementById('modalTitle').textContent = article.title;
+            document.getElementById('modalCategory').textContent = article.category === 'work' ? '工作思考' : '生活记录';
+            document.getElementById('modalReadingTime').querySelector('span').textContent = calcReadingTime(article.rawContent || '') + ' 分钟';
+            document.getElementById('modalPinBadge').classList.toggle('hidden', !article.pinned);
 
-/* 新建 */
-document.getElementById("newArticleBtn").onclick = ()=>{
-  editingArticleId = null;
-  document.getElementById("articleTitle").value="";
-  document.getElementById("articleContent").value="";
-  document.getElementById("articleExcerpt").value="";
-  document.getElementById("pinArticle").checked=false;
-  document.getElementById("editorModal").classList.remove("hidden");
-};
+            let html = article.content || markdownToHtml(article.rawContent);
+            document.getElementById('modalContent').innerHTML = html;
+            generateTOC(html);
+            renderRelatedArticles(article);
+            setTimeout(() => Prism.highlightAll(), 100);
 
-/* 编辑 */
-function openEditor(id){
-  const a = articles.find(x=>x.id==id);
-  if(!a) return;
+            // 每次打开文章都默认展开 TOC（避免上次收起后“以为按钮坏了”）
+            try { setTocCollapsed(false); } catch (e) {}
 
-  editingArticleId = id;
-  document.getElementById("articleTitle").value = a.title;
-  document.getElementById("articleContent").value = a.raw_content || "";
-  document.getElementById("articleExcerpt").value = a.excerpt || "";
-  document.getElementById("pinArticle").checked = !!a.pinned;
+            articleModal.classList.remove('hidden');
+            articleModal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function generateTOC(html) {
+            const tocList = document.getElementById('tocList');
+            const headings = html.match(/<h([123])>([^<]+)<\/h[123]>/g) || [];
+            
+            if (headings.length < 2) {
+                document.getElementById('tocSidebar').classList.add('hidden');
+                return;
+            }
+            
+            document.getElementById('tocSidebar').classList.remove('hidden');
+            tocList.innerHTML = headings.map((h, i) => {
+                const level = h.match(/<h([123])>/)[1];
+                const text = h.replace(/<\/?h[123]>/g, '');
+                return `<a class="toc-item level-${level}" data-index="${i}">${text}</a>`;
+            }).join('');
+        }
+        
+        function renderRelatedArticles(current) {
+            const related = articles.filter(a => a.id !== current.id && a.status === 'published' && (a.tag === current.tag || a.category === current.category)).slice(0, 3);
+            const container = document.getElementById('relatedList');
+            
+            if (related.length === 0) {
+                document.getElementById('relatedArticles').classList.add('hidden');
+                return;
+            }
+            
+            document.getElementById('relatedArticles').classList.remove('hidden');
+            container.innerHTML = related.map(a => `
+                <div class="related-article" onclick="openArticleModal(articles.find(x=>x.id===${a.id}))">
+                    <div class="w-1 h-10 rounded-full ${accentColors[a.tagColor]}"></div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-medium text-[var(--text-primary)] truncate">${a.title}</div>
+                        <div class="text-xs text-[var(--text-muted)]">${a.tag} · ${a.date}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function closeArticleModal() {
+            articleModal.classList.add('hidden');
+            articleModal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+        
+        document.getElementById('closeArticle').onclick = closeArticleModal;
+        articleModal.onclick = e => { if (e.target === articleModal) closeArticleModal(); };
+        
+        document.getElementById('tocList').addEventListener('click', e => {
+            if (e.target.classList.contains('toc-item')) {
+                const index = parseInt(e.target.dataset.index);
+                const modalContent = document.getElementById('modalContent');
+                const headings = modalContent.querySelectorAll('h1, h2, h3');
+                if (headings[index]) {
+                    document.querySelectorAll('.toc-item').forEach(item => item.classList.remove('active'));
+                    e.target.classList.add('active');
+                    headings[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        });
+        
+        function setTocCollapsed(collapsed) {
+            const sidebar = document.getElementById('tocSidebar');
+            const toggleBtn = document.getElementById('tocToggleBtn');
 
-  document.getElementById("editorModal").classList.remove("hidden");
-}
+            // 目录在小屏本来就是 hidden，这里只处理 lg+。
+            // collapsed=true：侧栏宽度设为0并隐藏内容；collapsed=false：恢复宽度。
+            if (collapsed) {
+                sidebar.classList.add('toc-collapsed');
+                toggleBtn.classList.remove('hidden');
+                toggleBtn.classList.add('flex');
+                toggleBtn.setAttribute('title', '展开目录');
+            } else {
+                sidebar.classList.remove('toc-collapsed');
+                toggleBtn.classList.add('hidden');
+                toggleBtn.classList.remove('flex');
+                toggleBtn.setAttribute('title', '收起目录');
+            }
+        }
 
-document.getElementById("closeEditorBtn").onclick=
-  ()=>document.getElementById("editorModal").classList.add("hidden");
+        document.getElementById('tocCollapseBtn').onclick = () => setTocCollapsed(true);
+        document.getElementById('tocToggleBtn').onclick = () => setTocCollapsed(false);
+        
+        document.querySelector('.modal-content').addEventListener('scroll', function() {
+            const scrollTop = this.scrollTop;
+            const scrollHeight = this.scrollHeight - this.clientHeight;
+            const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+            document.getElementById('articleProgressBar').style.width = progress + '%';
+        });
+        
+        // ===== 筛选器 =====
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const filterSlider = document.getElementById('filterSlider');
+        
+        function updateFilterSlider(btn) {
+            const rect = btn.getBoundingClientRect();
+            const containerRect = btn.parentElement.getBoundingClientRect();
+            filterSlider.style.width = rect.width + 'px';
+            filterSlider.style.transform = `translateX(${rect.left - containerRect.left - 4}px)`;
+        }
+        
+        filterBtns.forEach(btn => {
+            btn.onclick = () => {
+                filterBtns.forEach(b => { b.classList.remove('text-[var(--text-primary)]'); b.classList.add('text-[var(--text-muted)]'); });
+                btn.classList.add('text-[var(--text-primary)]');
+                btn.classList.remove('text-[var(--text-muted)]');
+                updateFilterSlider(btn);
+                renderArticles(btn.dataset.filter);
+            };
+        });
+        
+        setTimeout(() => updateFilterSlider(document.querySelector('[data-filter="all"]')), 100);
+        
+        // ===== 深色模式 =====
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+        
+        themeToggle.onclick = () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            sunIcon.classList.toggle('hidden', isDark);
+            moonIcon.classList.toggle('hidden', !isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        };
+        
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+        }
+        
+        // ===== 返回顶部 =====
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            backToTop.classList.toggle('visible', window.scrollY > 500);
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0;
+            document.getElementById('readingProgress').style.width = progress + '%';
+        });
+        backToTop.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // ===== 编辑器 =====
+        const editorModal = document.getElementById('editorModal');
+        const articleContent = document.getElementById('articleContent');
+        const charCount = document.getElementById('charCount');
+        const readingTimeEstimate = document.getElementById('readingTimeEstimate');
+        
+        let editorState = { mode: 'markdown', category: 'work', tag: '前端' };
+        
+        function openEditor() {
+            editorModal.classList.remove('hidden');
+            editorModal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+            switchToCreateTab();
+        }
+        
+        function closeEditorModal() {
+            editorModal.classList.add('hidden');
+            editorModal.classList.remove('flex');
+            document.body.style.overflow = '';
+            resetEditor();
+        }
+        
+        function resetEditor() {
+            editingArticleId = null;
+            document.getElementById('articleTitle').value = '';
+            articleContent.value = '';
+            document.getElementById('articleExcerpt').value = '';
+            document.getElementById('customTag').value = '';
+            document.getElementById('pinArticle').checked = false;
+            charCount.textContent = '0';
+            readingTimeEstimate.textContent = '约 0 分钟';
+            document.getElementById('publishBtnText').textContent = '发布文章';
+            isPreviewMode = false;
+            document.getElementById('previewPane').classList.add('hidden');
+            document.getElementById('togglePreview').classList.remove('active');
+            
+            document.getElementById('categoryWork').classList.add('border-purple-400');
+            document.getElementById('categoryLife').classList.remove('border-purple-400');
+            document.querySelectorAll('.tag-option').forEach((o, i) => {
+                o.classList.toggle('ring-2', i === 0);
+                o.classList.toggle('ring-purple-400', i === 0);
+            });
+            editorState = { mode: 'markdown', category: 'work', tag: '前端' };
+        }
+        
+        function switchToCreateTab() {
+            document.getElementById('tabCreate').classList.add('active');
+            document.getElementById('tabManage').classList.remove('active');
+            document.getElementById('createPanel').classList.remove('hidden');
+            document.getElementById('managePanel').classList.add('hidden');
+            document.getElementById('createFooter').classList.remove('hidden');
+        }
+        
+        function switchToManageTab() {
+            document.getElementById('tabManage').classList.add('active');
+            document.getElementById('tabCreate').classList.remove('active');
+            document.getElementById('managePanel').classList.remove('hidden');
+            document.getElementById('createPanel').classList.add('hidden');
+            document.getElementById('createFooter').classList.add('hidden');
+            renderArticleList();
+        }
+        
+        document.getElementById('tabCreate').onclick = switchToCreateTab;
+        document.getElementById('tabManage').onclick = switchToManageTab;
+        document.getElementById('editorBtn').onclick = openEditor;
+        document.getElementById('closeEditor').onclick = closeEditorModal;
+        document.getElementById('cancelBtn').onclick = closeEditorModal;
+        editorModal.onclick = e => { if (e.target === editorModal) closeEditorModal(); };
+        
+        document.getElementById('toggleFullscreen').onclick = () => {
+            document.getElementById('editorContainer').classList.toggle('fullscreen-editor');
+        };
+        
+        document.getElementById('togglePreview').onclick = () => {
+            isPreviewMode = !isPreviewMode;
+            document.getElementById('previewPane').classList.toggle('hidden', !isPreviewMode);
+            document.getElementById('togglePreview').classList.toggle('active', isPreviewMode);
+            if (isPreviewMode) updateLivePreview();
+        };
+        
+        function updateLivePreview() {
+            if (isPreviewMode) {
+                document.getElementById('livePreview').innerHTML = markdownToHtml(articleContent.value);
+                setTimeout(() => Prism.highlightAll(), 50);
+            }
+        }
+        
+        document.getElementById('markdownMode').onclick = () => {
+            document.getElementById('markdownMode').classList.add('active');
+            document.getElementById('richTextMode').classList.remove('active');
+            document.getElementById('markdownToolbar').style.display = 'flex';
+            editorState.mode = 'markdown';
+        };
+        
+        document.getElementById('richTextMode').onclick = () => {
+            document.getElementById('richTextMode').classList.add('active');
+            document.getElementById('markdownMode').classList.remove('active');
+            document.getElementById('markdownToolbar').style.display = 'none';
+            editorState.mode = 'richtext';
+        };
+        
+        articleContent.oninput = () => {
+            const text = articleContent.value;
+            charCount.textContent = text.length;
+            readingTimeEstimate.textContent = `约 ${calcReadingTime(text)} 分钟`;
+            updateLivePreview();
+        };
+        
+        document.getElementById('categoryWork').onclick = () => {
+            document.getElementById('categoryWork').classList.add('border-purple-400');
+            document.getElementById('categoryLife').classList.remove('border-purple-400');
+            editorState.category = 'work';
+        };
+        
+        document.getElementById('categoryLife').onclick = () => {
+            document.getElementById('categoryLife').classList.add('border-purple-400');
+            document.getElementById('categoryWork').classList.remove('border-purple-400');
+            editorState.category = 'life';
+        };
+        
+        document.querySelectorAll('.tag-option').forEach(opt => {
+            opt.onclick = () => {
+                document.querySelectorAll('.tag-option').forEach(o => o.classList.remove('ring-2', 'ring-purple-400'));
+                opt.classList.add('ring-2', 'ring-purple-400');
+                editorState.tag = opt.dataset.tag;
+            };
+        });
+        
+        const mdActions = {
+            bold: { prefix: '**', suffix: '**', placeholder: '粗体' },
+            italic: { prefix: '*', suffix: '*', placeholder: '斜体' },
+            h2: { prefix: '## ', suffix: '', placeholder: '标题', newLine: true },
+            ul: { prefix: '- ', suffix: '', placeholder: '列表项', newLine: true },
+            quote: { prefix: '> ', suffix: '', placeholder: '引用', newLine: true },
+            code: { prefix: '`', suffix: '`', placeholder: '代码' },
+            link: { prefix: '[', suffix: '](url)', placeholder: '链接文字' },
+            table: { prefix: '\n| 列1 | 列2 |\n|-----|-----|\n| 内容 | 内容 |\n', suffix: '', placeholder: '', newLine: true }
+        };
+        
+        document.querySelectorAll('.toolbar-btn[data-action]').forEach(btn => {
+            btn.onclick = () => {
+                const action = btn.dataset.action;
+                if (action === 'image') {
+                    document.getElementById('imageInput').click();
+                    return;
+                }
+                if (action === 'file') {
+                    document.getElementById('fileInput').click();
+                    return;
+                }
+                if (mdActions[action]) insertMarkdown(mdActions[action]);
+            };
+        });
+        
+        function insertMarkdown(config) {
+            const { prefix, suffix, placeholder, newLine } = config;
+            const start = articleContent.selectionStart;
+            const end = articleContent.selectionEnd;
+            const text = articleContent.value;
+            const selected = text.substring(start, end) || placeholder;
+            
+            let newText, newPos;
+            if (newLine && start > 0 && text[start - 1] !== '\n') {
+                newText = text.substring(0, start) + '\n' + prefix + selected + suffix + text.substring(end);
+                newPos = start + 1 + prefix.length + selected.length;
+            } else {
+                newText = text.substring(0, start) + prefix + selected + suffix + text.substring(end);
+                newPos = start + prefix.length + selected.length;
+            }
+            
+            articleContent.value = newText;
+            articleContent.focus();
+            articleContent.setSelectionRange(newPos, newPos);
+            articleContent.dispatchEvent(new Event('input'));
+        }
+        
+        document.getElementById('imageInput').onchange = async e => {
+            for (const file of e.target.files) {
+                if (!file.type.startsWith('image/')) continue;
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    insertText(`![${file.name}](${ev.target.result})`);
+                    showToast('📷 图片已插入');
+                };
+                reader.readAsDataURL(file);
+            }
+            e.target.value = '';
+        };
 
-/* 删除 */
-async function deleteArticle(id){
-  if(!confirm("确认删除？")) return;
-  try{
-    await fetch(`${API_BASE}/api/articles/${id}`,{
-      method:"DELETE",
-      headers:{ "X-Session-Id":sessionId }
-    });
-    articles = articles.filter(a=>a.id!=id);
-    renderArticles();
-  }catch{}
-}
+        // 文件附件：以 dataURL 方式嵌入（适合小文件）
+        // 语法：[file:name|size](data:...)
+        document.getElementById('fileInput').onchange = async e => {
+            for (const file of e.target.files) {
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    const dataUrl = ev.target.result;
+                    const safeName = (file.name || 'file').replace(/\|/g, '_');
+                    insertText(`[file:${safeName}|${file.size}](${dataUrl})`);
+                    showToast('📎 附件已插入');
+                };
+                reader.readAsDataURL(file);
+            }
+            e.target.value = '';
+        };
+        
+        function insertText(text) {
+            const start = articleContent.selectionStart;
+            const content = articleContent.value;
+            const prefix = (start > 0 && content[start - 1] !== '\n') ? '\n' : '';
+            articleContent.value = content.substring(0, start) + prefix + text + '\n' + content.substring(articleContent.selectionEnd);
+            articleContent.focus();
+            articleContent.dispatchEvent(new Event('input'));
+        }
+        
+        async function saveArticle(status) {
+            const title = document.getElementById('articleTitle').value.trim();
+            const raw = articleContent.value;
+            const excerpt = document.getElementById('articleExcerpt').value.trim();
+            const customTag = document.getElementById('customTag').value.trim();
+            const pinned = document.getElementById('pinArticle').checked;
 
-/* 保存文章 */
-async function save(status){
-  const title = document.getElementById("articleTitle").value.trim();
-  const raw = document.getElementById("articleContent").value;
-  const excerpt = document.getElementById("articleExcerpt").value;
-  const pinned = document.getElementById("pinArticle").checked?1:0;
+            if (!title && !raw) { showToast('请填写标题或内容'); return false; }
 
-  if(!title && !raw){
-    showToast("editorToast","请填写内容");
-    return;
-  }
+            const finalTag = customTag || editorState.tag;
 
-  const payload = {
-    title,
-    raw_content: raw,
-    excerpt,
-    status,
-    pinned
-  };
+            // 注意：Worker 写入 D1 时使用字段 rawContent，并存入 raw_content
+            const payload = {
+                title: title || '未命名文章',
+                excerpt: excerpt || raw.substring(0, 120).replace(/[#*`>\-\[\]!|]/g, '').trim() + '...',
+                rawContent: raw,
+                content: markdownToHtml(raw),
+                category: editorState.category,
+                tag: finalTag,
+                tagColor: tagColorMap[finalTag] || 'purple',
+                date: new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' }),
+                status,
+                pinned
+            };
 
-  try{
-    if(editingArticleId){
-      await fetch(`${API_BASE}/api/articles/${editingArticleId}`,{
-        method:"PUT",
-        headers:{ "X-Session-Id":sessionId,"Content-Type":"application/json"},
-        body:JSON.stringify(payload)
-      });
-    }else{
-      await fetch(`${API_BASE}/api/articles`,{
-        method:"POST",
-        headers:{ "X-Session-Id":sessionId,"Content-Type":"application/json"},
-        body:JSON.stringify(payload)
-      });
-    }
+            const url = editingArticleId ? api(`/api/articles/${editingArticleId}`) : api('/api/articles');
+            const method = editingArticleId ? 'PUT' : 'POST';
 
-    document.getElementById("editorModal").classList.add("hidden");
-    loadArticles();
+            // 离线模式：写入本地存储
+            if (USE_LOCAL_MODE) {
+                const list = getLocalArticles();
+                if (editingArticleId) {
+                    const idx = list.findIndex(x => x.id === editingArticleId);
+                    if (idx > -1) list[idx] = { ...list[idx], ...payload, id: editingArticleId };
+                } else {
+                    const newId = (list.at(-1)?.id || 0) + 1;
+                    list.push({ ...payload, id: newId });
+                    editingArticleId = newId;
+                }
+                setLocalArticles(list);
+                articles = list;
+                renderArticles();
+                renderArticleList();
+                return true;
+            }
 
-  }catch{ showToast("editorToast","保存失败"); }
-}
+            try {
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json', 'X-Session-Id': sessionId },
+                    body: JSON.stringify(payload)
+                });
 
-document.getElementById("saveDraftBtn").onclick=()=>save("draft");
-document.getElementById("publishBtn").onclick=()=>save("published");
+                const data = await res.json().catch(() => ({}));
 
+                if (res.status === 401) {
+                    clearSession();
+                    showAuthPage();
+                    showToast('会话已失效，请重新登录');
+                    return false;
+                }
 
-/* ------------------ 上传 ------------------- */
-document.getElementById("imageBtn").onclick=()=>document.getElementById("imageInput").click();
-document.getElementById("fileBtn").onclick=()=>document.getElementById("fileInput").click();
+                if (!res.ok) throw new Error(data.error || '保存失败');
 
-function insertMD(md){
-  const ta = document.getElementById("articleContent");
-  const s = ta.selectionStart, e = ta.selectionEnd;
-  ta.value = ta.value.slice(0,s) + md + ta.value.slice(e);
-}
+                await loadArticles();
+                // 管理面板如果打开，刷新列表
+                try { renderArticleList(); } catch {}
+                return true;
+            } catch (err) {
+                console.error('saveArticle failed:', err);
+                showToast(err.message || '保存失败');
+                return false;
+            }
+        }
+        
+        async function publishArticle() {
+            const ok = await saveArticle('published');
+            if (ok) {
+                closeEditorModal();
+                showToast('🎉 文章发布成功');
+            }
+        }
+        
+        async function saveDraft() {
+            const ok = await saveArticle('draft');
+            if (ok) {
+                showToast('📝 草稿已保存');
+            }
+        }
+        
+        document.getElementById('publishBtn').onclick = publishArticle;
+        document.getElementById('saveDraft').onclick = saveDraft;
+        
+        function renderArticleList() {
+            const search = document.getElementById('searchArticle').value.toLowerCase();
+            const status = document.getElementById('filterStatus').value;
+            const category = document.getElementById('filterCategory').value;
+            
+            let list = articles;
+            if (search) list = list.filter(a => a.title.toLowerCase().includes(search) || a.rawContent?.toLowerCase().includes(search));
+            if (status !== 'all') list = list.filter(a => a.status === status);
+            if (category !== 'all') list = list.filter(a => a.category === category);
+            
+            const container = document.getElementById('articleList');
+            if (list.length === 0) {
+                container.innerHTML = '<div class="p-12 text-center text-[var(--text-muted)]">暂无文章</div>';
+            } else {
+                container.innerHTML = list.map(a => `
+                    <div class="article-item p-4 flex items-center gap-4">
+                        <div class="w-1 h-12 rounded-full ${accentColors[a.tagColor]}"></div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                ${a.pinned ? '<span class="pin-badge">📌</span>' : ''}
+                                <h4 class="font-medium text-[var(--text-primary)] truncate">${a.title}</h4>
+                                <span class="px-2 py-0.5 rounded-full text-xs font-medium ${a.status === 'published' ? 'status-published' : 'status-draft'}">${a.status === 'published' ? '已发布' : '草稿'}</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-xs text-[var(--text-muted)]">
+                                <span>${a.tag}</span><span>${a.date}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="editArticle(${a.id})" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-[var(--text-muted)] hover:text-purple-500 cursor-pointer" title="编辑">✏️</button>
+                            <button onclick="togglePin(${a.id})" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-[var(--text-muted)] hover:text-red-500 cursor-pointer" title="置顶">${a.pinned ? '📌' : '📍'}</button>
+                            <button onclick="toggleStatus(${a.id})" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-[var(--text-muted)] hover:text-amber-500 cursor-pointer" title="切换状态">${a.status === 'published' ? '📤' : '📥'}</button>
+                            <button onclick="confirmDelete(${a.id})" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-[var(--text-muted)] hover:text-red-500 cursor-pointer" title="删除">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('totalCount').textContent = articles.length;
+            document.getElementById('publishedCount').textContent = articles.filter(a => a.status === 'published').length;
+            document.getElementById('draftCount').textContent = articles.filter(a => a.status === 'draft').length;
+        }
+        
+        document.getElementById('searchArticle').oninput = renderArticleList;
+        document.getElementById('filterStatus').onchange = renderArticleList;
+        document.getElementById('filterCategory').onchange = renderArticleList;
+        
+        window.editArticle = id => {
+            const a = articles.find(x => x.id === id);
+            if (a) {
+                editingArticleId = id;
+                document.getElementById('articleTitle').value = a.title;
+                articleContent.value = a.rawContent || '';
+                document.getElementById('articleExcerpt').value = a.excerpt;
+                document.getElementById('pinArticle').checked = a.pinned || false;
+                charCount.textContent = articleContent.value.length;
+                readingTimeEstimate.textContent = `约 ${calcReadingTime(articleContent.value)} 分钟`;
+                
+                if (a.category === 'life') document.getElementById('categoryLife').click();
+                else document.getElementById('categoryWork').click();
+                
+                const tagBtn = Array.from(document.querySelectorAll('.tag-option')).find(o => o.dataset.tag === a.tag);
+                if (tagBtn) tagBtn.click();
+                else document.getElementById('customTag').value = a.tag;
+                
+                document.getElementById('publishBtnText').textContent = '更新文章';
+                switchToCreateTab();
+            }
+        };
+        
+        window.togglePin = async id => {
+            if (USE_LOCAL_MODE) {
+                const list = getLocalArticles();
+                const idx = list.findIndex(x => x.id === id);
+                if (idx > -1) list[idx].pinned = !list[idx].pinned;
+                setLocalArticles(list); articles = list; renderArticles(); renderArticleList(); return; }
+            try {
+                const res = await fetch(api(`/api/articles/${id}/toggle-pin`), {
+                    method: 'POST',
+                    headers: { 'X-Session-Id': sessionId }
+                });
+                if (!res.ok) throw new Error('置顶切换失败');
+                await loadArticles();
+                renderArticleList();
+            } catch (e) { showToast(e.message || '置顶切换失败'); }
+        };
+        
+        window.toggleStatus = async id => {
+            if (USE_LOCAL_MODE) {
+                const list = getLocalArticles();
+                const idx = list.findIndex(x => x.id === id);
+                if (idx > -1) list[idx].status = list[idx].status === 'published' ? 'draft' : 'published';
+                setLocalArticles(list); articles = list; renderArticles(); renderArticleList(); return; }
+            try {
+                const res = await fetch(api(`/api/articles/${id}/toggle-status`), {
+                    method: 'POST',
+                    headers: { 'X-Session-Id': sessionId }
+                });
+                if (!res.ok) throw new Error('状态切换失败');
+                await loadArticles();
+                renderArticleList();
+            } catch (e) { showToast(e.message || '状态切换失败'); }
+        };
+        
+        const deleteModal = document.getElementById('deleteModal');
+        let deleteId = null;
+        
+        window.confirmDelete = id => {
+            const a = articles.find(x => x.id === id);
+            if (a) {
+                deleteId = id;
+                document.getElementById('deleteArticleTitle').textContent = a.title;
+                deleteModal.classList.remove('hidden');
+                deleteModal.classList.add('flex');
+            }
+        };
+        
+        function closeDeleteModal() {
+            deleteModal.classList.add('hidden');
+            deleteModal.classList.remove('flex');
+            deleteId = null;
+        }
+        
+        document.getElementById('cancelDelete').onclick = closeDeleteModal;
+        document.getElementById('confirmDelete').onclick = async () => {
+            if (!deleteId) return;
+            if (USE_LOCAL_MODE) {
+                const list = getLocalArticles().filter(a => a.id !== deleteId);
+                setLocalArticles(list); articles = list; renderArticleList(); renderArticles(); closeDeleteModal(); showToast('文章已删除'); return;
+            }
+            try {
+                const res = await fetch(api(`/api/articles/${deleteId}`), {
+                    method: 'DELETE',
+                    headers: { 'X-Session-Id': sessionId }
+                });
+                if (!res.ok) throw new Error('删除失败');
+                await loadArticles();
+                renderArticleList();
+                closeDeleteModal();
+                showToast('文章已删除');
+            } catch (e) { showToast(e.message || '删除失败'); }
+        };
+        deleteModal.onclick = e => { if (e.target === deleteModal) closeDeleteModal(); };
+        
+        // ===== 图片查看器 =====
+        const imageViewer = document.getElementById('imageViewer');
+        document.addEventListener('click', e => {
+            if (e.target.matches('#modalContent img, #livePreview img')) {
+                document.getElementById('viewerImage').src = e.target.src;
+                imageViewer.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        });
+        imageViewer.onclick = () => {
+            imageViewer.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+        
+        // ===== 快捷键 =====
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                closeArticleModal();
+                closeEditorModal();
+                closeDeleteModal();
+                imageViewer.classList.remove('active');
+            }
+            
+            if (editorModal.classList.contains('flex') && !document.getElementById('createPanel').classList.contains('hidden')) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key.toLowerCase()) {
+                        case 'b': e.preventDefault(); insertMarkdown(mdActions.bold); break;
+                        case 'i': e.preventDefault(); insertMarkdown(mdActions.italic); break;
+                        case 's': e.preventDefault(); saveDraft(); break;
+                        case 'enter': e.preventDefault(); publishArticle(); break;
+                    }
+                }
+            }
+        });
+        
+        // ===== Toast =====
+        function showToast(msg) {
+            let toast = document.querySelector('.toast');
+            if (!toast) { toast = document.createElement('div'); toast.className = 'toast'; document.body.appendChild(toast); }
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+        
+        window.copyCode = btn => {
+            const code = btn.parentElement.nextElementSibling.textContent;
+            navigator.clipboard.writeText(code);
+            btn.textContent = '已复制';
+            setTimeout(() => btn.textContent = '复制', 2000);
+        };
+        
+        // ===== 初始化 =====
+        // 修复“刷新时闪一下登录页又进入首页”的问题：
+        // 关键点：
+        // 1) 刷新必须重新登录：直接在启动时清理 session（仅此一次）
+        // 2) 清理后立刻阻止任何“自动进入首页”的逻辑（不再 fallback 到 local mode）
+        // 3) 默认先显示登录页，避免视觉闪烁
+        (function bootstrapAuth() {
+            // 1) 默认先展示登录页，避免首屏闪烁
+            try { showAuthPage(); } catch (e) {}
 
-document.getElementById("imageInput").onchange = async(e)=>{
-  const f = e.target.files[0];
-  if(!f) return;
+            // 2) 刷新必须重新登录：
+            //    - 不再依赖 localStorage 的持久 session
+            //    - 直接清理 localStorage 中的 sessionId/sessionExpiresAt
+            //    这样就不会出现“登录一次后刷新又自动进入首页”。
+            clearSession();
 
-  if(f.size <= MAX_INLINE_FILE_BYTES){
-    // base64 fallback
-    const reader = new FileReader();
-    reader.onload=()=>{ insertMD(`\n![${f.name}](${reader.result})\n`); };
-    reader.readAsDataURL(f);
-    return;
-  }
+            // 3) 禁止离线自动进入首页（避免你说的“闪一下又进首页”）
+            USE_LOCAL_MODE = false;
 
-  const form = new FormData();
-  form.append("file", f);
+            // 4) 进入认证流程：一定会停留在登录页，直到登录成功
+            checkAuth();
+        })();
 
-  try{
-    const res = await fetch(`${API_BASE}/api/upload`,{
-      method:"POST",
-      headers:{ "X-Session-Id":sessionId },
-      body:form
-    });
-    const j = await res.json();
-    if(j.url){
-      insertMD(`\n![${f.name}](${j.url})\n`);
-      return;
-    }
-  }catch{}
-  showToast("editorToast","上传失败，请检查 Worker 是否配置 GitHub 上传");
-};
-
-document.getElementById("fileInput").onchange = async(e)=>{
-  const f = e.target.files[0];
-  if(!f) return;
-
-  const form = new FormData();
-  form.append("file", f);
-
-  try{
-    const res = await fetch(`${API_BASE}/api/upload`,{
-      method:"POST",
-      headers:{ "X-Session-Id":sessionId },
-      body:form
-    });
-    const j = await res.json();
-    if(j.url){
-      insertMD(`\n[${f.name}](${j.url})\n`);
-      return;
-    }
-  }catch{}
-  showToast("editorToast","上传失败");
-};
-
-
-/* ------------------ INIT ------------------- */
-checkAuth();
-
-</script>
+        window.onresize = () => updateFilterSlider(document.querySelector('.filter-btn.text-[var(--text-primary)]') || document.querySelector('[data-filter="all"]'));
+    </script>
 </body>
 </html>
